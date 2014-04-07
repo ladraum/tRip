@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.texoit.trip</groupId>
-	<version>0.1</version>
+	<version>0.2-SNAPSHOT</version>
 	<artifactId>trip-parent</artifactId>
 	<name>tRip</name>
 	<packaging>pom</packaging>
