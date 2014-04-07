@@ -1,4 +1,4 @@
-package trip.spi;
+package trip.spi.helpers;
 
 import java.util.Iterator;
 
