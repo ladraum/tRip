@@ -6,13 +6,25 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
 
+import lombok.val;
 import trip.spi.helpers.ConvertProviderIterableToMap;
 import trip.spi.helpers.SingleObjectIterable;
 
 public class ServiceProvider {
 
-	final Map<Class<?>, Iterable<?>> injectables = new HashMap<>();
-	final Map<Class<?>, ProviderFactory<?>> providers = loadAllProviders();
+	final Map<Class<?>, Iterable<?>> injectables;
+	final Map<Class<?>, ProviderFactory<?>> providers;
+	
+	public ServiceProvider() {
+		this.injectables = createDefaultInjectables();
+		this.providers = loadAllProviders();
+	}
+
+	private HashMap<Class<?>, Iterable<?>> createDefaultInjectables() {
+		val injectables = new HashMap<Class<?>, Iterable<?>>();
+		injectables.put( getClass(), new SingleObjectIterable<ServiceProvider>( this ));
+		return injectables;
+	}
 
 	private Map<Class<?>, ProviderFactory<?>> loadAllProviders() {
 		try {
@@ -24,14 +36,20 @@ public class ServiceProvider {
 		}
 	}
 
-	@SuppressWarnings( "unchecked" )
 	public <T> T load( Class<T> interfaceClazz ) throws ServiceProviderException {
-		ProviderFactory<T> provider = (ProviderFactory<T>)this.providers.get( interfaceClazz );
+		ProviderFactory<T> provider = getProviderFor(interfaceClazz);
 		if ( provider != null )
 			return provider.provide();
 		for ( T provided : loadAll( interfaceClazz ) )
 			return provided;
 		return null;
+	}
+
+	@SuppressWarnings( "unchecked" )
+	public <T> ProviderFactory<T> getProviderFor(Class<T> interfaceClazz) {
+		if ( this.providers == null )
+			return null;
+		return (ProviderFactory<T>)this.providers.get( interfaceClazz );
 	}
 
 	@SuppressWarnings( "unchecked" )

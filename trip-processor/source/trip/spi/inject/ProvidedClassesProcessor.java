@@ -1,8 +1,11 @@
 package trip.spi.inject;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -113,8 +116,27 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 	}
 
 	Writer createResource( String resourcePath ) throws IOException {
-		FileObject resource = filer().createResource( StandardLocation.CLASS_OUTPUT, "", resourcePath );
-		return resource.openWriter();
+		FileObject resource = filer().getResource( StandardLocation.CLASS_OUTPUT, "", resourcePath );
+		URI uri = resource.toUri();
+		createNeededDirectoriesTo(uri);
+		File file = createFile(uri);
+		return new FileWriter( file );
+	}
+
+	void createNeededDirectoriesTo(URI uri) {
+		File dir = null;
+		if ( uri.isAbsolute() )
+			dir = new File( uri ).getParentFile();
+		else
+			dir = new File( uri.toString() ).getParentFile();
+		dir.mkdirs();
+	}
+
+	File createFile(URI uri) throws IOException {
+		File file = new File(uri);
+		if ( !file.exists() )
+			file.createNewFile();
+		return file;
 	}
 
 	Filer filer() {

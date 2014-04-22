@@ -2,6 +2,6 @@ package trip.spi;
 
 public interface ProviderFactory<T> {
 
-	T provide();
+	T provide() throws ServiceProviderException;
 
 }
