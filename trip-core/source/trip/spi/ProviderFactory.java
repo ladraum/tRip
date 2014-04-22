@@ -1,6 +1,6 @@
 package trip.spi;
 
-public interface Provider<T> {
+public interface ProviderFactory<T> {
 
 	T provide();
 

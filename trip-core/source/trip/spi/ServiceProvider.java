@@ -12,12 +12,12 @@ import trip.spi.helpers.SingleObjectIterable;
 public class ServiceProvider {
 
 	final Map<Class<?>, Iterable<?>> injectables = new HashMap<>();
-	final Map<Class<?>, Provider<?>> providers = loadAllProviders();
+	final Map<Class<?>, ProviderFactory<?>> providers = loadAllProviders();
 
-	private Map<Class<?>, Provider<?>> loadAllProviders() {
+	private Map<Class<?>, ProviderFactory<?>> loadAllProviders() {
 		try {
 			return ConvertProviderIterableToMap
-					.from( loadAll( Provider.class ) )
+					.from( loadAll( ProviderFactory.class ) )
 					.convert();
 		} catch ( ServiceProviderException e ) {
 			throw new IllegalStateException( e );
@@ -26,7 +26,7 @@ public class ServiceProvider {
 
 	@SuppressWarnings( "unchecked" )
 	public <T> T load( Class<T> interfaceClazz ) throws ServiceProviderException {
-		Provider<T> provider = (Provider<T>)this.providers.get( interfaceClazz );
+		ProviderFactory<T> provider = (ProviderFactory<T>)this.providers.get( interfaceClazz );
 		if ( provider != null )
 			return provider.provide();
 		for ( T provided : loadAll( interfaceClazz ) )
@@ -55,7 +55,7 @@ public class ServiceProvider {
 			throw new ServiceProviderException( "The class " + interfaceClazz + " should be an interface." );
 	}
 
-	public <T> void provideFor( Class<T> interfaceClazz, Provider<T> provider ) {
+	public <T> void provideFor( Class<T> interfaceClazz, ProviderFactory<T> provider ) {
 		this.providers.put( interfaceClazz, provider );
 	}
 

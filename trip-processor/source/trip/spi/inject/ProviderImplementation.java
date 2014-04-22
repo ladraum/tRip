@@ -7,6 +7,8 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.type.TypeMirror;
 
+import trip.spi.Service;
+
 public class ProviderImplementation {
 
 	final String interfaceClass;
@@ -35,12 +37,12 @@ public class ProviderImplementation {
 	}
 
 	private static boolean isAnnotationBlank( TypeMirror providedClass ) {
-		return providedClass.toString().equals( Provides.class.getCanonicalName() );
+		return providedClass.toString().equals( Service.class.getCanonicalName() );
 	}
 
 	private static TypeMirror getProvidedClass( TypeElement type ) {
 		try {
-			Provides provides = type.getAnnotation( Provides.class );
+			Service provides = type.getAnnotation( Service.class );
 			provides.value();
 			return null;
 		} catch ( MirroredTypeException cause ) {

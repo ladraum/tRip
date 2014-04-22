@@ -1,6 +1,6 @@
 package trip.spi;
 
-public class ClosureProvider implements Provider<Closure> {
+public class ClosureProvider implements ProviderFactory<Closure> {
 
 	@Override
 	public Closure provide() {

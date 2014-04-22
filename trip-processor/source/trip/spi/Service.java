@@ -1,4 +1,4 @@
-package trip.spi.inject;
+package trip.spi;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention( RetentionPolicy.RUNTIME )
 @Target( { ElementType.METHOD, ElementType.TYPE } )
-public @interface Provides {
+public @interface Service {
 
-	Class<?> value() default Provides.class;
+	Class<?> value() default Service.class;
 }

@@ -2,6 +2,7 @@ package trip.spi.inject;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +22,9 @@ import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
 
-import trip.spi.Provider;
+import trip.spi.Producer;
+import trip.spi.Service;
+import trip.spi.ProviderFactory;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
@@ -32,7 +35,7 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 
 	static final String EOL = "\n";
 	static final String SERVICES = "META-INF/services/";
-	static final String PROVIDER_FILE = SERVICES + Provider.class.getCanonicalName();
+	static final String PROVIDER_FILE = SERVICES + ProviderFactory.class.getCanonicalName();
 
 	final DefaultMustacheFactory mustacheFactory = new DefaultMustacheFactory();
 	final Mustache providedClazzTemplate = this.mustacheFactory.compile( "META-INF/provided-class.mustache" );
@@ -50,7 +53,8 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 	}
 
 	void process( RoundEnvironment roundEnv ) throws IOException {
-		process( roundEnv, Provides.class );
+		processServices( roundEnv, Service.class );
+		processProducers( roundEnv, Producer.class );
 		if ( !this.factoryProviders.isEmpty() )
 			createServiceProviderForClassProviders();
 		if ( !this.providers.isEmpty() )
@@ -58,13 +62,18 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 		flush();
 	}
 
-	void process( RoundEnvironment roundEnv, Class<Provides> annotation ) throws IOException {
+	void processServices( RoundEnvironment roundEnv, Class<? extends Annotation> annotation ) {
+		Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith( Service.class );
+		for ( Element element : annotatedElements )
+			if ( element.getKind() == ElementKind.CLASS )
+				memorizeAProviderImplementation( ProviderImplementation.from( element ) );
+	}
+
+	void processProducers( RoundEnvironment roundEnv, Class<? extends Annotation> annotation ) throws IOException {
 		Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith( annotation );
 		for ( Element element : annotatedElements )
 			if ( element.getKind() == ElementKind.METHOD )
 				createAProviderFactoryClassFrom( FactoryProvidedClass.from( element ) );
-			else if ( element.getKind() == ElementKind.CLASS )
-				memorizeAProviderImplementation( ProviderImplementation.from( element ) );
 	}
 
 	void createAProviderFactoryClassFrom( FactoryProvidedClass clazz ) throws IOException {

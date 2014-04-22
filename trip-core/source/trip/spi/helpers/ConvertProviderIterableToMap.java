@@ -6,27 +6,27 @@ import java.util.HashMap;
 import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
-import trip.spi.Provider;
+import trip.spi.ProviderFactory;
 
 @RequiredArgsConstructor( staticName = "from" )
 @SuppressWarnings( "rawtypes" )
 public class ConvertProviderIterableToMap {
 
-	final Iterable<Provider> iterable;
+	final Iterable<ProviderFactory> iterable;
 
-	public Map<Class<?>, Provider<?>> convert() {
-		Map<Class<?>, Provider<?>> map = new HashMap<>();
-		for ( Provider provider : this.iterable ) {
+	public Map<Class<?>, ProviderFactory<?>> convert() {
+		Map<Class<?>, ProviderFactory<?>> map = new HashMap<>();
+		for ( ProviderFactory provider : this.iterable ) {
 			Class clazz = getGenericClassFrom( provider );
 			map.put( clazz, provider );
 		}
 		return map;
 	}
 
-	private Class getGenericClassFrom( Provider provider ) {
+	private Class getGenericClassFrom( ProviderFactory provider ) {
 		Type[] types = provider.getClass().getGenericInterfaces();
 		for ( Type type : types )
-			if ( ( (ParameterizedType)type ).getRawType().equals( Provider.class ) )
+			if ( ( (ParameterizedType)type ).getRawType().equals( ProviderFactory.class ) )
 				return (Class)( (ParameterizedType)type ).getActualTypeArguments()[0];
 		return null;
 	}

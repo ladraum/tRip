@@ -1,8 +1,8 @@
 package trip.spi.tests;
 
-import trip.spi.inject.Provides;
+import trip.spi.Service;
 
-@Provides
+@Service
 public class Mars implements World {
 
 	@Override

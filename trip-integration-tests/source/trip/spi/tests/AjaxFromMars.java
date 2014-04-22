@@ -1,9 +1,9 @@
 package trip.spi.tests;
 
 import trip.spi.Provided;
-import trip.spi.inject.Provides;
+import trip.spi.Service;
 
-@Provides( Hero.class )
+@Service( Hero.class )
 public class AjaxFromMars implements Hero, World {
 
 	@Provided

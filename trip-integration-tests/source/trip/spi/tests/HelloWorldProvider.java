@@ -1,10 +1,10 @@
 package trip.spi.tests;
 
-import trip.spi.inject.Provides;
+import trip.spi.Producer;
 
 public class HelloWorldProvider {
 
-	@Provides
+	@Producer
 	public HelloWorld createHelloWorld() {
 		return new HelloWorld();
 	}
