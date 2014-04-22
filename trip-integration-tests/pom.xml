@@ -8,8 +8,8 @@
 		<artifactId>trip-parent</artifactId>
 	</parent>
 
-	<artifactId>trip-processor</artifactId>
-	<name>tRip: Annotation Processor</name>
+	<artifactId>trip-integration-tests</artifactId>
+	<name>tRip: Integration Tests</name>
 	<packaging>jar</packaging>
 
 	<dependencies>
@@ -18,21 +18,13 @@
 			<artifactId>trip-core</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>trip-processor</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.github.spullara.mustache.java</groupId>
 			<artifactId>compiler</artifactId>
 		</dependency>
 	</dependencies>
 
-	<build>
-		<plugins>
-			<plugin>
-				<inherited>true</inherited>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<proc>none</proc>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
 </project>

@@ -9,7 +9,7 @@ import java.util.ServiceLoader;
 import trip.spi.helpers.ConvertProviderIterableToMap;
 import trip.spi.helpers.SingleObjectIterable;
 
-public class ProviderService {
+public class ServiceProvider {
 
 	final Map<Class<?>, Iterable<?>> injectables = new HashMap<>();
 	final Map<Class<?>, Provider<?>> providers = loadAllProviders();

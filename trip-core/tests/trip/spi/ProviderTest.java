@@ -7,7 +7,7 @@ import org.junit.Test;
 
 public class ProviderTest {
 
-	final ProviderService provider = new ProviderService();
+	final ServiceProvider provider = new ServiceProvider();
 
 	@Test
 	public void grantThatInjectTestableResources() throws ServiceProviderException {
