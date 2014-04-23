@@ -16,7 +16,6 @@ import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedOptions;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -26,14 +25,13 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
 
 import trip.spi.Producer;
-import trip.spi.Service;
 import trip.spi.ProviderFactory;
+import trip.spi.Service;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 
 @SupportedAnnotationTypes( "trip.spi.*" )
-@SupportedOptions( {} )
 public class ProvidedClassesProcessor extends AbstractProcessor {
 
 	static final String EOL = "\n";
@@ -43,7 +41,7 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 	final DefaultMustacheFactory mustacheFactory = new DefaultMustacheFactory();
 	final Mustache providedClazzTemplate = this.mustacheFactory.compile( "META-INF/provided-class.mustache" );
 	final List<String> factoryProviders = new ArrayList<>();
-	final Map<String, String> providers = new HashMap<>();
+	final Map<String, List<String>> providers = new HashMap<>();
 
 	@Override
 	public boolean process( Set<? extends TypeElement> annotations, RoundEnvironment roundEnv ) {
@@ -66,7 +64,7 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 	}
 
 	void processServices( RoundEnvironment roundEnv, Class<? extends Annotation> annotation ) {
-		Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith( Service.class );
+		Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith( annotation );
 		for ( Element element : annotatedElements )
 			if ( element.getKind() == ElementKind.CLASS )
 				memorizeAProviderImplementation( ProviderImplementation.from( element ) );
@@ -93,7 +91,12 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 	}
 
 	void memorizeAProviderImplementation( ProviderImplementation from ) {
-		this.providers.put( from.interfaceClass(), from.implementationClass() );
+		List<String> list = this.providers.get( from.interfaceClass() );//, 
+		if ( list == null ) {
+			list = new ArrayList<>();
+			this.providers.put( from.interfaceClass(), list );
+		}
+		list.add( from.implementationClass() );
 	}
 
 	void createServiceProviderForClassProviders() throws IOException {
@@ -110,7 +113,8 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 	void createServiceLocators() throws IOException {
 		for ( String interfaceClass : this.providers.keySet() ) {
 			Writer resource = createResource( SERVICES + interfaceClass );
-			resource.write( this.providers.get( interfaceClass ) + EOL );
+			for ( String implementation : this.providers.get( interfaceClass ) )
+				resource.write( implementation + EOL );
 			resource.close();
 		}
 	}
