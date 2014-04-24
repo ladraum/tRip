@@ -1,5 +1,6 @@
 package trip.spi.inject;
 
+import static trip.spi.inject.NameTransformations.*;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.DeclaredType;
@@ -15,11 +16,11 @@ public class FactoryProvidedClass {
 	public FactoryProvidedClass(
 			final String packageName, final String provider,
 			final String providedMethod, final String type, final String typeName ) {
-		this.packageName = packageName;
-		this.provider = provider;
-		this.providerMethod = providedMethod;
-		this.type = type;
-		this.typeName = typeName;
+		this.packageName = stripGenericsFrom( packageName );
+		this.provider = stripGenericsFrom( provider );
+		this.providerMethod = stripGenericsFrom( providedMethod );
+		this.type = stripGenericsFrom( type );
+		this.typeName = stripGenericsFrom( typeName );
 	}
 
 	public static FactoryProvidedClass from( Element element ) {

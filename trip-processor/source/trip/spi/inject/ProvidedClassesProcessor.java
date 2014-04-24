@@ -70,6 +70,15 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 				memorizeAProviderImplementation( ProviderImplementation.from( element ) );
 	}
 
+	void memorizeAProviderImplementation( ProviderImplementation from ) {
+		List<String> list = this.providers.get( from.interfaceClass() );//, 
+		if ( list == null ) {
+			list = new ArrayList<>();
+			this.providers.put( from.interfaceClass(), list );
+		}
+		list.add( from.implementationClass() );
+	}
+
 	void processProducers( RoundEnvironment roundEnv, Class<? extends Annotation> annotation ) throws IOException {
 		Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith( annotation );
 		for ( Element element : annotatedElements )
@@ -90,15 +99,6 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 		this.factoryProviders.add( name );
 	}
 
-	void memorizeAProviderImplementation( ProviderImplementation from ) {
-		List<String> list = this.providers.get( from.interfaceClass() );//, 
-		if ( list == null ) {
-			list = new ArrayList<>();
-			this.providers.put( from.interfaceClass(), list );
-		}
-		list.add( from.implementationClass() );
-	}
-
 	void createServiceProviderForClassProviders() throws IOException {
 		Writer writer = createServiceForProviderInterface();
 		for ( String provider : this.factoryProviders )
@@ -113,8 +113,9 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 	void createServiceLocators() throws IOException {
 		for ( String interfaceClass : this.providers.keySet() ) {
 			Writer resource = createResource( SERVICES + interfaceClass );
-			for ( String implementation : this.providers.get( interfaceClass ) )
-				resource.write( implementation.replace("<>", "") + EOL );
+			for ( String implementation : this.providers.get( interfaceClass ) ){
+				resource.write( implementation + EOL );
+			}
 			resource.close();
 		}
 	}

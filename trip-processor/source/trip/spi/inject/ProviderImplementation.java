@@ -17,7 +17,7 @@ public class ProviderImplementation {
 	public ProviderImplementation(
 			String interfaceClass, String implementationClass ) {
 		this.interfaceClass = interfaceClass;
-		this.implementationClass = implementationClass;
+		this.implementationClass = implementationClass.replaceAll("<[^>]*>", "");
 	}
 
 	public static ProviderImplementation from( Element element ) {
