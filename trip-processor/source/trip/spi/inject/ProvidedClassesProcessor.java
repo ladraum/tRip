@@ -114,7 +114,7 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 		for ( String interfaceClass : this.providers.keySet() ) {
 			Writer resource = createResource( SERVICES + interfaceClass );
 			for ( String implementation : this.providers.get( interfaceClass ) )
-				resource.write( implementation + EOL );
+				resource.write( implementation.replace("<>", "") + EOL );
 			resource.close();
 		}
 	}
