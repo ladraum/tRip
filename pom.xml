@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.texoit.trip</groupId>
-	<version>0.4</version>
+	<version>0.5</version>
 	<artifactId>trip-parent</artifactId>
 	<name>tRip</name>
 	<packaging>pom</packaging>
@@ -151,10 +151,28 @@
 					<exclude>**/*.java</exclude>
 				</excludes>
 			</resource>
+			<resource>
+				<directory>${project.build.directory}/generated-sources/annotations</directory>
+				<includes>
+					<include>**/*.*</include>
+				</includes>
+				<excludes>
+					<exclude>**/*.java</exclude>
+				</excludes>
+			</resource>
 		</resources>
 		<testResources>
 			<testResource>
 				<directory>${project.basedir}/tests</directory>
+				<includes>
+					<include>**/*.*</include>
+				</includes>
+				<excludes>
+					<exclude>**/*.java</exclude>
+				</excludes>
+			</testResource>
+			<testResource>
+				<directory>${project.build.directory}/generated-sources/test-annotations</directory>
 				<includes>
 					<include>**/*.*</include>
 				</includes>
