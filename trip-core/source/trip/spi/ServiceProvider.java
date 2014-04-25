@@ -1,15 +1,20 @@
 package trip.spi;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
 
 import lombok.val;
+import lombok.experimental.ExtensionMethod;
 import trip.spi.helpers.ConvertProviderIterableToMap;
 import trip.spi.helpers.SingleObjectIterable;
+import trip.spi.helpers.filter.AnyObject;
+import trip.spi.helpers.filter.Condition;
+import trip.spi.helpers.filter.Filter;
+import trip.spi.helpers.filter.NamedProvider;
 
+@ExtensionMethod( Filter.class )
 public class ServiceProvider {
 
 	final Map<Class<?>, Iterable<?>> injectables;
@@ -20,13 +25,13 @@ public class ServiceProvider {
 		this.providers = loadAllProviders();
 	}
 
-	private HashMap<Class<?>, Iterable<?>> createDefaultInjectables() {
+	protected HashMap<Class<?>, Iterable<?>> createDefaultInjectables() {
 		val injectables = new HashMap<Class<?>, Iterable<?>>();
 		injectables.put( getClass(), new SingleObjectIterable<ServiceProvider>( this ));
 		return injectables;
 	}
 
-	private Map<Class<?>, ProviderFactory<?>> loadAllProviders() {
+	protected Map<Class<?>, ProviderFactory<?>> loadAllProviders() {
 		try {
 			return ConvertProviderIterableToMap
 					.from( loadAll( ProviderFactory.class ) )
@@ -37,40 +42,41 @@ public class ServiceProvider {
 	}
 
 	public <T> T load( Class<T> interfaceClazz ) throws ServiceProviderException {
+		return load( interfaceClazz, new AnyObject<T>() );
+	}
+
+	public <T> T load( Class<T> interfaceClazz, Condition<T> condition ) throws ServiceProviderException {
 		ProviderFactory<T> provider = getProviderFor(interfaceClazz);
 		if ( provider != null )
 			return provider.provide();
-		for ( T provided : loadAll( interfaceClazz ) )
-			return provided;
-		return null;
+		return loadAll( interfaceClazz, condition ).first( condition );
 	}
 
 	@SuppressWarnings( "unchecked" )
-	public <T> ProviderFactory<T> getProviderFor(Class<T> interfaceClazz) {
+	protected <T> ProviderFactory<T> getProviderFor(Class<T> interfaceClazz) {
 		if ( this.providers == null )
 			return null;
 		return (ProviderFactory<T>)this.providers.get( interfaceClazz );
 	}
+	
+	public <T> Iterable<T> loadAll( Class<T> interfaceClazz ) throws ServiceProviderException {
+		return loadAll( interfaceClazz, new AnyObject<T>() );
+	}
 
 	@SuppressWarnings( "unchecked" )
-	public <T> Iterable<T> loadAll( Class<T> interfaceClazz ) throws ServiceProviderException {
+	public <T> Iterable<T> loadAll( Class<T> interfaceClazz, Condition<T> condition ) throws ServiceProviderException {
 		Iterable<T> iterable = (Iterable<T>)this.injectables.get( interfaceClazz );
 		if ( iterable == null ) {
-			iterable = loadServiceProvidersFor( interfaceClazz );
+			iterable = loadServiceProvidersFor( interfaceClazz, condition );
 			provideFor( interfaceClazz, iterable );
 			provideOn( iterable );
 		}
 		return iterable;
 	}
 
-	protected <T> Iterable<T> loadServiceProvidersFor( Class<T> interfaceClazz ) throws ServiceProviderException {
-		assertIsInterface( interfaceClazz );
-		return ServiceLoader.load( interfaceClazz );
-	}
-
-	protected <T> void assertIsInterface( Class<T> interfaceClazz ) throws ServiceProviderException {
-		if ( !Modifier.isInterface( interfaceClazz.getModifiers() ) )
-			throw new ServiceProviderException( "The class " + interfaceClazz + " should be an interface." );
+	protected <T> Iterable<T> loadServiceProvidersFor(
+			Class<T> interfaceClazz, Condition<T> condition ) throws ServiceProviderException {
+		return ServiceLoader.load( interfaceClazz ).filter(condition);
 	}
 
 	public <T> void provideFor( Class<T> interfaceClazz, ProviderFactory<T> provider ) {
@@ -108,12 +114,21 @@ public class ServiceProvider {
 				injectOnField( object, field );
 	}
 
-	protected void injectOnField( Object object, Field field ) throws IllegalAccessException, ServiceProviderException {
+	@SuppressWarnings("unchecked")
+	protected <T> void injectOnField( Object object, Field field ) throws IllegalAccessException, ServiceProviderException {
 		field.setAccessible( true );
-		Class<?> fieldType = field.getType();
-		Object fieldValue = load( fieldType );
+		Condition<T> condition = (Condition<T>)extractInjectionFilterCondition( field ); 
+		Class<T> fieldType = (Class<T>)field.getType();
+		Object fieldValue = load( fieldType, condition );
 		if ( fieldValue != null )
 			provideOn( fieldValue );
 		field.set( object, fieldValue );
+	}
+
+	protected Condition<?> extractInjectionFilterCondition( Field field ) {
+		Name annotation = field.getAnnotation( Name.class );
+		if ( annotation == null )
+			return new AnyObject<Object>();
+		return new NamedProvider<Object>( annotation.value() );
 	}
 }

@@ -10,4 +10,6 @@ import java.lang.annotation.Target;
 public @interface Service {
 
 	Class<?> value() default Service.class;
+	
+	String name() default "";
 }
