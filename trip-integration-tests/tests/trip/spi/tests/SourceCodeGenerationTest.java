@@ -1,6 +1,7 @@
 package trip.spi.tests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
@@ -19,9 +20,20 @@ public class SourceCodeGenerationTest {
 
 	@Test
 	public void grantThatCouldRetrieveAjaxFromMars() throws ServiceProviderException {
-		Hero hero = this.provider.load( Hero.class );
-		assertEquals( hero.getClass(), AjaxFromMars.class );
+		Hero hero = this.provider.load( Hero.class, "ajax" );
+		assertNotNull( "No 'Hero' implementations found", hero );
+		assertEquals( "Expected 'Hero' should be 'AjaxFromMars' instance",
+				hero.getClass(), AjaxFromMars.class );
 		AjaxFromMars ajax = (AjaxFromMars)hero;
-		assertEquals( "Mars", ajax.getWorld() );
+		assertEquals( "'ajax' doesn't provide the expected string", "Mars", ajax.getWorld() );
+	}
+
+	@Test
+	public void grantThatCouldRetrieveBatman() throws ServiceProviderException {
+		Hero hero = this.provider.load( Hero.class, "batman" );
+		assertNotNull( hero );
+		assertEquals( Batman.class, hero.getClass() );
+		Batman batman = (Batman)hero;
+		assertEquals( "'batman' doesn't provide the expected string", "AjaxFromMars", batman.getWorld() );
 	}
 }

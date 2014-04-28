@@ -45,6 +45,10 @@ public class ServiceProvider {
 		return load( interfaceClazz, new AnyObject<T>() );
 	}
 
+	public <T> T load( Class<T> interfaceClazz, String name ) throws ServiceProviderException {
+		return load( interfaceClazz, new NamedProvider<T>( name ) );
+	}
+
 	public <T> T load( Class<T> interfaceClazz, Condition<T> condition ) throws ServiceProviderException {
 		ProviderFactory<T> provider = getProviderFor(interfaceClazz);
 		if ( provider != null )
@@ -62,6 +66,10 @@ public class ServiceProvider {
 	public <T> Iterable<T> loadAll( Class<T> interfaceClazz ) throws ServiceProviderException {
 		return loadAll( interfaceClazz, new AnyObject<T>() );
 	}
+	
+	public <T> Iterable<T> loadAll( Class<T> interfaceClazz, String name ) throws ServiceProviderException {
+		return loadAll( interfaceClazz, new NamedProvider<T>( name ) );
+	}
 
 	@SuppressWarnings( "unchecked" )
 	public <T> Iterable<T> loadAll( Class<T> interfaceClazz, Condition<T> condition ) throws ServiceProviderException {
@@ -71,12 +79,12 @@ public class ServiceProvider {
 			provideFor( interfaceClazz, iterable );
 			provideOn( iterable );
 		}
-		return iterable;
+		return iterable.filter(condition);
 	}
 
 	protected <T> Iterable<T> loadServiceProvidersFor(
 			Class<T> interfaceClazz, Condition<T> condition ) throws ServiceProviderException {
-		return ServiceLoader.load( interfaceClazz ).filter(condition);
+		return ServiceLoader.load( interfaceClazz );
 	}
 
 	public <T> void provideFor( Class<T> interfaceClazz, ProviderFactory<T> provider ) {
