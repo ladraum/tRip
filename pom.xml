@@ -2,8 +2,8 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.texoit.trip</groupId>
-	<version>0.7</version>
+	<groupId>io.skullabs.trip</groupId>
+	<version>0.8</version>
 	<artifactId>trip-parent</artifactId>
 	<name>tRip</name>
 	<packaging>pom</packaging>
@@ -18,21 +18,21 @@
 
 	<distributionManagement>
 		<repository>
-			<id>texo-release-repository</id>
-			<name>Texo Release Repository</name>
-			<url>http://repository.texoit.com:8081/content/repositories/PublicRelease/</url>
+			<id>release-repository</id>
+			<name>Release Repository</name>
+			<url>http://skullabs.io:8081/content/repositories/PublicRelease/</url>
 		</repository>
 		<snapshotRepository>
-			<id>texo-snapshot-repository</id>
-			<name>Texo Snapshot Repository</name>
-			<url>http://repository.texoit.com:8081/content/repositories/PublicSnapshot/</url>
+			<id>snapshot-repository</id>
+			<name>Snapshot Repository</name>
+			<url>http://skullabs.io:8081/content/repositories/PublicSnapshot/</url>
 		</snapshotRepository>
 	</distributionManagement>
 
 	<developers>
 		<developer>
 			<id>miere</id>
-			<email>miere.teixeira@texoit.com</email>
+			<email>miere.teixeira@gmail.com</email>
 			<name>Miere Liniel Teixeira</name>
 		</developer>
 	</developers>

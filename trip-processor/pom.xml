@@ -3,8 +3,8 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>com.texoit.trip</groupId>
-		<version>0.7</version>
+		<groupId>io.skullabs.trip</groupId>
+		<version>0.8</version>
 		<artifactId>trip-parent</artifactId>
 	</parent>
 
