@@ -19,6 +19,12 @@ public class SourceCodeGenerationTest {
 	}
 
 	@Test
+	public void grantThatGenerateNewHelloFoo() throws ServiceProviderException {
+		HelloWorld helloWorld = this.provider.load( HelloWorld.class, "foo" );
+		assertEquals( "Fooo!!!", helloWorld.toString() );
+	}
+
+	@Test
 	public void grantThatCouldRetrieveAjaxFromMars() throws ServiceProviderException {
 		Hero hero = this.provider.load( Hero.class, "ajax" );
 		assertNotNull( "No 'Hero' implementations found", hero );

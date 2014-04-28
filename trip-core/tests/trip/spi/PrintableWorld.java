@@ -3,6 +3,7 @@ package trip.spi;
 public class PrintableWorld implements PrintableWord {
 
 	@Provided
+	@Name( "period" )
 	Closure closure;
 
 	@Override
