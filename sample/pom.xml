@@ -8,8 +8,8 @@
 		<artifactId>trip-parent</artifactId>
 	</parent>
 
-	<artifactId>blah</artifactId>
-	<name>Blah</name>
+	<artifactId>sample</artifactId>
+	<name>Sample</name>
 	<packaging>jar</packaging>
 
 	<dependencies>

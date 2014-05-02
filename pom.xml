@@ -54,6 +54,7 @@
 		<module>trip-core</module>
 		<module>trip-processor</module>
 		<module>trip-integration-tests</module>
+		<module>sample</module>
 	</modules>
 
 	<properties>
