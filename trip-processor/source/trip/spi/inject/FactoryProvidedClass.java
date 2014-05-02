@@ -1,6 +1,6 @@
 package trip.spi.inject;
 
-import static trip.spi.inject.NameTransformations.*;
+import static trip.spi.inject.NameTransformations.stripGenericsFrom;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -12,6 +12,7 @@ public class FactoryProvidedClass {
 
 	final String packageName;
 	final String provider;
+	final String providerName;
 	final String providerMethod;
 	final String type;
 	final String typeName;
@@ -19,10 +20,12 @@ public class FactoryProvidedClass {
 
 	public FactoryProvidedClass(
 			final String packageName, final String provider,
+			final String providerName,
 			final String providedMethod, final String type,
 			final String typeName, final String name ) {
 		this.packageName = stripGenericsFrom( packageName );
 		this.provider = stripGenericsFrom( provider );
+		this.providerName = stripGenericsFrom( providerName );
 		this.providerMethod = stripGenericsFrom( providedMethod );
 		this.type = stripGenericsFrom( type );
 		this.typeName = stripGenericsFrom( typeName );
@@ -31,16 +34,20 @@ public class FactoryProvidedClass {
 
 	public static FactoryProvidedClass from( Element element ) {
 		ExecutableElement method = assertElementIsMethod( element );
+		String providerName = method.getEnclosingElement().getSimpleName().toString();
+		String provider = method.getEnclosingElement().asType().toString();
 		DeclaredType returnType = (DeclaredType)method.getReturnType();
 		String type = returnType.toString();
 		String typeName = returnType.asElement().getSimpleName().toString();
 		return new FactoryProvidedClass(
-				type.replace( "." + typeName, "" ),
-				method.getEnclosingElement().asType().toString(),
-				method.getSimpleName().toString(), type, typeName,
+				provider.replace( "." + providerName, "" ),
+				provider,
+				provider.replace( ".", "Dot" ),
+				method.getSimpleName().toString(),
+				type, typeName,
 				extractNameFrom( element ) );
 	}
-	
+
 	static String extractNameFrom( Element element ) {
 		Name name = element.getAnnotation( Name.class );
 		if ( name != null )
@@ -62,6 +69,10 @@ public class FactoryProvidedClass {
 
 	public String providerMethod() {
 		return this.providerMethod;
+	}
+
+	public String providerName() {
+		return this.providerName;
 	}
 
 	public String type() {

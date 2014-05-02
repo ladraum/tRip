@@ -8,8 +8,8 @@
 		<artifactId>trip-parent</artifactId>
 	</parent>
 
-	<artifactId>trip-integration-tests</artifactId>
-	<name>tRip: Integration Tests</name>
+	<artifactId>sample</artifactId>
+	<name>Sample</name>
 	<packaging>jar</packaging>
 
 	<dependencies>
@@ -20,10 +20,6 @@
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>trip-processor</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.github.spullara.mustache.java</groupId>
-			<artifactId>compiler</artifactId>
 		</dependency>
 	</dependencies>
 
