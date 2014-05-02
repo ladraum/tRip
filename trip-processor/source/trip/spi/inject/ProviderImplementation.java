@@ -1,5 +1,7 @@
 package trip.spi.inject;
 
+import static trip.spi.inject.NameTransformations.stripGenericsFrom;
+
 import java.util.List;
 
 import javax.lang.model.element.Element;
@@ -16,8 +18,8 @@ public class ProviderImplementation {
 
 	public ProviderImplementation(
 			String interfaceClass, String implementationClass ) {
-		this.interfaceClass = interfaceClass;
-		this.implementationClass = implementationClass.replaceAll("<[^>]*>", "");
+		this.interfaceClass = stripGenericsFrom( interfaceClass );
+		this.implementationClass = stripGenericsFrom( implementationClass );
 	}
 
 	public static ProviderImplementation from( Element element ) {

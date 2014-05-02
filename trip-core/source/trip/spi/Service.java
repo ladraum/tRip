@@ -6,10 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention( RetentionPolicy.RUNTIME )
-@Target( { ElementType.METHOD, ElementType.TYPE } )
+@Target( { ElementType.TYPE } )
 public @interface Service {
 
 	Class<?> value() default Service.class;
-	
+
 	String name() default "";
 }
