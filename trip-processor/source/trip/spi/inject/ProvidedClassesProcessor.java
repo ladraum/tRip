@@ -46,6 +46,7 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 	@Override
 	public boolean process( Set<? extends TypeElement> annotations, RoundEnvironment roundEnv ) {
 		try {
+			System.out.println( "tRip is processing " + roundEnv );
 			process( roundEnv );
 		} catch ( IOException e ) {
 			e.printStackTrace();
