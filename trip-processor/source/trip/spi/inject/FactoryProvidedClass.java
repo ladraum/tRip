@@ -2,11 +2,15 @@ package trip.spi.inject;
 
 import static trip.spi.inject.NameTransformations.stripGenericsFrom;
 
+import java.util.List;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 
 import trip.spi.Name;
+import trip.spi.ProviderContext;
 
 public class FactoryProvidedClass {
 
@@ -17,12 +21,14 @@ public class FactoryProvidedClass {
 	final String type;
 	final String typeName;
 	final String name;
+	final boolean expectsContext;
 
 	public FactoryProvidedClass(
 			final String packageName, final String provider,
 			final String providerName,
 			final String providedMethod, final String type,
-			final String typeName, final String name ) {
+			final String typeName, final String name,
+			final boolean expectsContext ) {
 		this.packageName = stripGenericsFrom( packageName );
 		this.provider = stripGenericsFrom( provider );
 		this.providerName = stripGenericsFrom( providerName );
@@ -30,6 +36,7 @@ public class FactoryProvidedClass {
 		this.type = stripGenericsFrom( type );
 		this.typeName = stripGenericsFrom( typeName );
 		this.name = name;
+		this.expectsContext = expectsContext;
 	}
 
 	public static FactoryProvidedClass from( Element element ) {
@@ -45,7 +52,19 @@ public class FactoryProvidedClass {
 				provider.replace( ".", "Dot" ),
 				method.getSimpleName().toString(),
 				type, typeName,
-				extractNameFrom( element ) );
+				extractNameFrom( element ),
+				measureIfExpectsContextAsParameter( method ) );
+	}
+
+	static boolean measureIfExpectsContextAsParameter( ExecutableElement method ) {
+		List<? extends VariableElement> parameters = method.getParameters();
+		if ( parameters.size() == 0 )
+			return false;
+		VariableElement variableElement = parameters.get( 0 );
+		if ( !variableElement.asType().toString().equals( ProviderContext.class.getCanonicalName() ) )
+			throw new IllegalStateException(
+					"@Provider annotated methods should have no parameters, or the parameter should be of type ProviderContext." );
+		return true;
 	}
 
 	static String extractNameFrom( Element element ) {

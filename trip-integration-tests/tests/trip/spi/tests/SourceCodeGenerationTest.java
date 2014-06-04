@@ -5,6 +5,8 @@ import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
+import trip.spi.Producer;
+import trip.spi.ProviderContext;
 import trip.spi.ServiceProvider;
 import trip.spi.ServiceProviderException;
 
@@ -41,5 +43,10 @@ public class SourceCodeGenerationTest {
 		assertEquals( Batman.class, hero.getClass() );
 		Batman batman = (Batman)hero;
 		assertEquals( "'batman' doesn't provide the expected string", "AjaxFromMars", batman.getWorld() );
+	}
+
+	@Producer
+	public String produceAGenericString( ProviderContext context ) {
+		return null;
 	}
 }
