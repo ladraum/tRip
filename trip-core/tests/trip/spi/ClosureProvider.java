@@ -4,7 +4,7 @@ package trip.spi;
 public class ClosureProvider implements ProviderFactory<Closure> {
 
 	@Override
-	public Closure provide() {
+	public Closure provide( ProviderContext context ) {
 		return new PeriodClosure();
 	}
 
