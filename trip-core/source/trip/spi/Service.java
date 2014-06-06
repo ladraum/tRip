@@ -11,5 +11,5 @@ public @interface Service {
 
 	Class<?> value() default Service.class;
 
-	String name() default "";
+	boolean singleton() default true;
 }

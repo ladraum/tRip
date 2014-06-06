@@ -1,17 +1,15 @@
 package trip.spi.helpers.filter;
 
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 import trip.spi.Name;
 
 @RequiredArgsConstructor
-public class NamedProvider<T> implements Condition<T> {
+public class NamedClass<T> implements Condition<Class<T>> {
 
 	final String name;
 
 	@Override
-	public boolean check(Object object) {
-		val clazz = object.getClass();
+	public boolean check(Class<T> clazz) {
 		Name nameAnnotation = clazz.getAnnotation( Name.class );
 		if ( nameAnnotation == null )
 			return false;
