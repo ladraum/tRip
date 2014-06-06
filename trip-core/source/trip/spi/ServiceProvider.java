@@ -3,24 +3,34 @@ package trip.spi;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.ServiceLoader;
+//import java.util.ServiceLoader;
+
+
+
+
+
+
+
 
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 import trip.spi.helpers.EmptyProviderContext;
 import trip.spi.helpers.FieldProviderContext;
-import trip.spi.helpers.ProvidersMap;
+import trip.spi.helpers.ProviderFactoryMap;
 import trip.spi.helpers.SingleObjectIterable;
+import trip.spi.helpers.cache.ServiceLoader;
 import trip.spi.helpers.filter.AnyObject;
 import trip.spi.helpers.filter.Condition;
 import trip.spi.helpers.filter.Filter;
-import trip.spi.helpers.filter.NamedProvider;
+import trip.spi.helpers.filter.NamedClass;
+import trip.spi.helpers.filter.NamedObject;
 
 @ExtensionMethod( Filter.class )
 public class ServiceProvider {
 
+	final Map<Class<?>, Iterable<Class<?>>> implementedClasses = new HashMap<Class<?>, Iterable<Class<?>>>();
 	final Map<Class<?>, Iterable<?>> injectables;
-	final ProvidersMap providers;
+	final ProviderFactoryMap providers;
 
 	public ServiceProvider() {
 		this.injectables = createDefaultInjectables();
@@ -33,9 +43,9 @@ public class ServiceProvider {
 		return injectables;
 	}
 
-	protected ProvidersMap loadAllProviders() {
+	protected ProviderFactoryMap loadAllProviders() {
 		try {
-			return ProvidersMap.from( loadAll( ProviderFactory.class ) );
+			return ProviderFactoryMap.from( loadAll( ProviderFactory.class ) );
 		} catch ( ServiceProviderException e ) {
 			throw new IllegalStateException( e );
 		}
@@ -46,7 +56,7 @@ public class ServiceProvider {
 	}
 
 	public <T> T load( Class<T> interfaceClazz, String name ) throws ServiceProviderException {
-		return load( interfaceClazz, new NamedProvider<T>( name ) );
+		return load( interfaceClazz, new NamedObject<T>( name ) );
 	}
 
 	public <T> T load( Class<T> interfaceClazz, Condition<T> condition ) throws ServiceProviderException {
@@ -68,28 +78,51 @@ public class ServiceProvider {
 		return this.providers.get( interfaceClazz, condition );
 	}
 
-	public <T> Iterable<T> loadAll( Class<T> interfaceClazz ) throws ServiceProviderException {
-		return loadAll( interfaceClazz, new AnyObject<T>() );
+	public <T> Iterable<T> loadAll( Class<T> interfaceClazz, String name ) throws ServiceProviderException {
+		return loadAll( interfaceClazz, new NamedObject<T>( name ) );
 	}
 
-	public <T> Iterable<T> loadAll( Class<T> interfaceClazz, String name ) throws ServiceProviderException {
-		return loadAll( interfaceClazz, new NamedProvider<T>( name ) );
+	public <T> Iterable<T> loadAll( Class<T> interfaceClazz, Condition<T> condition ) throws ServiceProviderException {
+		return loadAll( interfaceClazz ).filter( condition );
 	}
 
 	@SuppressWarnings( "unchecked" )
-	public <T> Iterable<T> loadAll( Class<T> interfaceClazz, Condition<T> condition ) throws ServiceProviderException {
+	public <T> Iterable<T> loadAll( Class<T> interfaceClazz ) throws ServiceProviderException {
 		Iterable<T> iterable = (Iterable<T>)this.injectables.get( interfaceClazz );
 		if ( iterable == null ) {
-			iterable = loadServiceProvidersFor( interfaceClazz, condition );
+			iterable = loadServiceProvidersFor( interfaceClazz );
 			provideFor( interfaceClazz, iterable );
 			provideOn( iterable );
 		}
-		return (Iterable<T>)iterable.filter( condition );
+		return (Iterable<T>)iterable;
 	}
 
 	protected <T> Iterable<T> loadServiceProvidersFor(
-			Class<T> interfaceClazz, Condition<T> condition ) throws ServiceProviderException {
-		return ServiceLoader.load( interfaceClazz );
+			Class<T> interfaceClazz ) throws ServiceProviderException {
+		Iterable<Class<T>> iterableInterfaces = loadClassesImplementing(interfaceClazz);
+		return ServiceLoader.loadFrom(iterableInterfaces);
+	}
+	
+	public <T> Class<T> loadClassImplementing(Class<T> interfaceClazz, String named) {
+		return loadClassImplementing(interfaceClazz, new NamedClass<T>(named) );
+	}
+
+	public <T> Class<T> loadClassImplementing(Class<T> interfaceClazz, Condition<Class<T>> condition) {
+		return loadClassesImplementing(interfaceClazz).first( condition );
+	}
+
+	public <T> Iterable<Class<T>> loadClassesImplementing(Class<T> interfaceClazz, Condition<Class<T>> condition ) {
+		return loadClassesImplementing(interfaceClazz).filter( condition );
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public <T> Iterable<Class<T>> loadClassesImplementing(Class<T> interfaceClazz) {
+		Iterable<Class<T>> implementations = (Iterable)implementedClasses.get(interfaceClazz);
+		if ( implementations == null ){
+			implementations = ServiceLoader.loadImplementationsFor(interfaceClazz);
+			implementedClasses.put((Class)interfaceClazz, (Iterable)implementations);
+		}
+		return implementations;
 	}
 
 	public <T> void provideFor( Class<T> interfaceClazz, ProviderFactory<T> provider ) {
@@ -142,6 +175,6 @@ public class ServiceProvider {
 		Name annotation = field.getAnnotation( Name.class );
 		if ( annotation == null )
 			return new AnyObject<Object>();
-		return new NamedProvider<Object>( annotation.value() );
+		return new NamedObject<Object>( annotation.value() );
 	}
 }

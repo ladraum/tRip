@@ -14,14 +14,14 @@ import trip.spi.helpers.filter.Condition;
 import trip.spi.helpers.filter.Filter;
 
 @ExtensionMethod( Filter.class )
-public class ProvidersMap implements Map<Class<?>, List<ProviderFactory<?>>> {
+public class ProviderFactoryMap implements Map<Class<?>, List<ProviderFactory<?>>> {
 
 	@Delegate
 	final Map<Class<?>, List<ProviderFactory<?>>> map = new HashMap<>();
 
 	@SuppressWarnings("rawtypes")
-	public static ProvidersMap from( Iterable<ProviderFactory> iterable ) {
-		ProvidersMap providers = new ProvidersMap();
+	public static ProviderFactoryMap from( Iterable<ProviderFactory> iterable ) {
+		ProviderFactoryMap providers = new ProviderFactoryMap();
 		for ( ProviderFactory<?> provider : iterable ) {
 			Class<?> clazz = getGenericClassFrom( provider );
 			providers.memorizeProviderForClazz(provider, clazz);
