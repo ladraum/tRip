@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class LazyClassInstantor<T> implements CachedIterator<T> {
+public class LazyClassInstantor<T> implements Iterator<T> {
 	
 	final Iterator<Class<T>> reader;
 	List<T> cache = new ArrayList<T>();
