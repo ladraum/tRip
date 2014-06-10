@@ -4,7 +4,7 @@
 
 	<parent>
 		<groupId>io.skullabs.trip</groupId>
-		<version>0.10-SNAPSHOT</version>
+		<version>0.10</version>
 		<artifactId>trip-parent</artifactId>
 	</parent>
 
