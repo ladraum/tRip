@@ -16,7 +16,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
    
 @RequiredArgsConstructor
-public class LazyClassReader<S> implements Iterator<Class<S>>, CachedIterator<Class<S>> {
+public class LazyClassReader<S> implements Iterator<Class<S>> {
 
     private static final String PREFIX = "META-INF/services/";
     private static final int NOT_FOUND = -1;
