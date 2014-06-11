@@ -45,7 +45,7 @@ public class LazyClassReader<S> implements Iterator<Class<S>> {
 		try {
 			if ( currentResourceLines == null || !currentResourceLines.hasNext() )
 				readNextResourceFile();
-			return currentResourceLines.hasNext();
+			return currentResourceLines != null && currentResourceLines.hasNext();
 		} catch ( IOException cause ) {
 			throw new IllegalStateException(cause);
 		}
