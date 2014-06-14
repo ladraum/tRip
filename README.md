@@ -129,7 +129,7 @@ Configuring a maven project is easy. Just include the following repository and d
 ...
 	<dependency>
 		<groupId>io.skullabs.trip</groupId>
-		<version>0.10</version>
+		<version>0.10.1</version>
 		<artifactId>trip-core</artifactId>
 	</dependency>
 ...
