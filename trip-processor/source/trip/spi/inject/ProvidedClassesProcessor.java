@@ -1,35 +1,19 @@
 package trip.spi.inject;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
-import java.lang.annotation.Annotation;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.Filer;
-import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.TypeElement;
-import javax.tools.FileObject;
-import javax.tools.JavaFileObject;
-import javax.tools.StandardLocation;
-
-import trip.spi.Producer;
-import trip.spi.ProviderFactory;
-import trip.spi.Service;
-
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
+
+import java.io.*;
+import java.lang.annotation.Annotation;
+import java.net.URI;
+import java.util.*;
+
+import javax.annotation.processing.*;
+import javax.lang.model.SourceVersion;
+import javax.lang.model.element.*;
+import javax.tools.*;
+
+import trip.spi.*;
 
 @SupportedAnnotationTypes( "trip.spi.*" )
 public class ProvidedClassesProcessor extends AbstractProcessor {
@@ -89,6 +73,7 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 
 	void createAProviderFactoryClassFrom( FactoryProvidedClass clazz ) throws IOException {
 		String name = createClassCanonicalName( clazz );
+		System.out.println( "Generating " + name );
 		JavaFileObject sourceFile = filer().createSourceFile( name );
 		Writer writer = sourceFile.openWriter();
 		this.providedClazzTemplate.execute( writer, clazz );
@@ -121,6 +106,7 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 
 	void createServiceLocators() throws IOException {
 		for ( String interfaceClass : this.providers.keySet() ) {
+			System.out.println( "Registering service providers for " + interfaceClass );
 			Writer resource = createResource( SERVICES + interfaceClass );
 			for ( String implementation : this.providers.get( interfaceClass ) )
 				resource.write( implementation + EOL );

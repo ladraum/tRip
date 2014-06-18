@@ -35,6 +35,8 @@ public class ProviderImplementation {
 			throw new IllegalStateException( "You should specify a provider interface for " + type.asType().toString() );
 		if ( !isAnnotationBlank( providedClass ) )
 			return providedClass.toString();
+		if ( interfaces.isEmpty() )
+			return type.asType().toString();
 		return interfaces.get( 0 ).toString();
 	}
 
