@@ -15,4 +15,14 @@ public class EmptyProviderContext implements ProviderContext {
 	public Class<?> targetType() {
 		return null;
 	}
+
+	@Override
+	public Object attribute( String key ) {
+		return null;
+	}
+
+	@Override
+	public <T> T attribute( Class<T> key ) {
+		return null;
+	}
 }

@@ -8,6 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
 import trip.spi.ProviderContext;
 
+/**
+ * Holds data about a field some value should be injected.
+ */
 @Getter
 @Accessors
 @RequiredArgsConstructor
@@ -23,5 +26,15 @@ public class FieldProviderContext implements ProviderContext {
 	@Override
 	public Class<?> targetType() {
 		return field.getType();
+	}
+
+	@Override
+	public Object attribute( String key ) {
+		return null;
+	}
+
+	@Override
+	public <T> T attribute( Class<T> key ) {
+		return null;
 	}
 }
