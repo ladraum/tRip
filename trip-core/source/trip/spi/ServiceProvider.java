@@ -3,27 +3,13 @@ package trip.spi;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
-//import java.util.ServiceLoader;
-
-
-
-
-
-
-
+// import java.util.ServiceLoader;
 
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
-import trip.spi.helpers.EmptyProviderContext;
-import trip.spi.helpers.FieldProviderContext;
-import trip.spi.helpers.ProviderFactoryMap;
-import trip.spi.helpers.SingleObjectIterable;
+import trip.spi.helpers.*;
 import trip.spi.helpers.cache.ServiceLoader;
-import trip.spi.helpers.filter.AnyObject;
-import trip.spi.helpers.filter.Condition;
-import trip.spi.helpers.filter.Filter;
-import trip.spi.helpers.filter.NamedClass;
-import trip.spi.helpers.filter.NamedObject;
+import trip.spi.helpers.filter.*;
 
 @ExtensionMethod( Filter.class )
 public class ServiceProvider {
@@ -63,12 +49,16 @@ public class ServiceProvider {
 		return load( interfaceClazz, condition, new EmptyProviderContext() );
 	}
 
+	public <T> T load( Class<T> interfaceClazz, ProviderContext context ) throws ServiceProviderException {
+		return load( interfaceClazz, new AnyObject<T>(), context );
+	}
+
 	@SuppressWarnings( "unchecked" )
 	public <T> T load( Class<T> interfaceClazz, Condition<T> condition, ProviderContext context ) throws ServiceProviderException {
 		ProviderFactory<?> provider = getProviderFor( interfaceClazz, condition );
 		if ( provider != null )
 			return (T)provider.provide( context );
-		return (T)loadAll( interfaceClazz, condition ).first( condition );
+		return loadAll( interfaceClazz, condition ).first( condition );
 	}
 
 	private <T> ProviderFactory<?> getProviderFor( Class<T> interfaceClazz,
@@ -94,33 +84,33 @@ public class ServiceProvider {
 			provideFor( interfaceClazz, iterable );
 			provideOn( iterable );
 		}
-		return (Iterable<T>)iterable;
+		return iterable;
 	}
 
 	protected <T> Iterable<T> loadServiceProvidersFor(
 			Class<T> interfaceClazz ) throws ServiceProviderException {
-		Iterable<Class<T>> iterableInterfaces = loadClassesImplementing(interfaceClazz);
-		return ServiceLoader.loadFrom(iterableInterfaces);
-	}
-	
-	public <T> Class<T> loadClassImplementing(Class<T> interfaceClazz, String named) {
-		return loadClassImplementing(interfaceClazz, new NamedClass<T>(named) );
+		Iterable<Class<T>> iterableInterfaces = loadClassesImplementing( interfaceClazz );
+		return ServiceLoader.loadFrom( iterableInterfaces );
 	}
 
-	public <T> Class<T> loadClassImplementing(Class<T> interfaceClazz, Condition<Class<T>> condition) {
-		return loadClassesImplementing(interfaceClazz).first( condition );
+	public <T> Class<T> loadClassImplementing( Class<T> interfaceClazz, String named ) {
+		return loadClassImplementing( interfaceClazz, new NamedClass<T>( named ) );
 	}
 
-	public <T> Iterable<Class<T>> loadClassesImplementing(Class<T> interfaceClazz, Condition<Class<T>> condition ) {
-		return loadClassesImplementing(interfaceClazz).filter( condition );
+	public <T> Class<T> loadClassImplementing( Class<T> interfaceClazz, Condition<Class<T>> condition ) {
+		return loadClassesImplementing( interfaceClazz ).first( condition );
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public <T> Iterable<Class<T>> loadClassesImplementing(Class<T> interfaceClazz) {
-		Iterable<Class<T>> implementations = (Iterable)implementedClasses.get(interfaceClazz);
-		if ( implementations == null ){
-			implementations = ServiceLoader.loadImplementationsFor(interfaceClazz);
-			implementedClasses.put((Class)interfaceClazz, (Iterable)implementations);
+	public <T> Iterable<Class<T>> loadClassesImplementing( Class<T> interfaceClazz, Condition<Class<T>> condition ) {
+		return loadClassesImplementing( interfaceClazz ).filter( condition );
+	}
+
+	@SuppressWarnings( { "rawtypes", "unchecked" } )
+	public <T> Iterable<Class<T>> loadClassesImplementing( Class<T> interfaceClazz ) {
+		Iterable<Class<T>> implementations = (Iterable)implementedClasses.get( interfaceClazz );
+		if ( implementations == null ) {
+			implementations = ServiceLoader.loadImplementationsFor( interfaceClazz );
+			implementedClasses.put( (Class)interfaceClazz, (Iterable)implementations );
 		}
 		return implementations;
 	}
