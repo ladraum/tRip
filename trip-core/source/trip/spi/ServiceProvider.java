@@ -1,6 +1,5 @@
 package trip.spi;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 // import java.util.ServiceLoader;
@@ -12,8 +11,9 @@ import trip.spi.helpers.cache.ServiceLoader;
 import trip.spi.helpers.filter.*;
 
 @ExtensionMethod( Filter.class )
-public class ServiceProvider {
+public class ServiceProvider implements InterfaceProvider {
 
+	final Map<Class<?>, ProvidableClass<?>> providableClassCache = new HashMap<Class<?>, ProvidableClass<?>>();
 	final Map<Class<?>, Iterable<Class<?>>> implementedClasses = new HashMap<Class<?>, Iterable<Class<?>>>();
 	final Map<Class<?>, Iterable<?>> injectables;
 	final ProviderFactoryMap providers;
@@ -37,22 +37,55 @@ public class ServiceProvider {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see trip.spi.InterfaceProvider#load(java.lang.Class)
+	 */
+	@Override
 	public <T> T load( Class<T> interfaceClazz ) throws ServiceProviderException {
 		return load( interfaceClazz, new AnyObject<T>() );
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see trip.spi.InterfaceProvider#load(java.lang.Class, java.lang.String)
+	 */
+	@Override
 	public <T> T load( Class<T> interfaceClazz, String name ) throws ServiceProviderException {
 		return load( interfaceClazz, new NamedObject<T>( name ) );
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see trip.spi.InterfaceProvider#load(java.lang.Class,
+	 * trip.spi.helpers.filter.Condition)
+	 */
+	@Override
 	public <T> T load( Class<T> interfaceClazz, Condition<T> condition ) throws ServiceProviderException {
 		return load( interfaceClazz, condition, new EmptyProviderContext() );
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see trip.spi.InterfaceProvider#load(java.lang.Class,
+	 * trip.spi.ProviderContext)
+	 */
+	@Override
 	public <T> T load( Class<T> interfaceClazz, ProviderContext context ) throws ServiceProviderException {
 		return load( interfaceClazz, new AnyObject<T>(), context );
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see trip.spi.InterfaceProvider#load(java.lang.Class,
+	 * trip.spi.helpers.filter.Condition, trip.spi.ProviderContext)
+	 */
+	@Override
 	@SuppressWarnings( "unchecked" )
 	public <T> T load( Class<T> interfaceClazz, Condition<T> condition, ProviderContext context ) throws ServiceProviderException {
 		ProviderFactory<?> provider = getProviderFor( interfaceClazz, condition );
@@ -68,14 +101,34 @@ public class ServiceProvider {
 		return this.providers.get( interfaceClazz, condition );
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see trip.spi.InterfaceProvider#loadAll(java.lang.Class,
+	 * java.lang.String)
+	 */
+	@Override
 	public <T> Iterable<T> loadAll( Class<T> interfaceClazz, String name ) throws ServiceProviderException {
 		return loadAll( interfaceClazz, new NamedObject<T>( name ) );
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see trip.spi.InterfaceProvider#loadAll(java.lang.Class,
+	 * trip.spi.helpers.filter.Condition)
+	 */
+	@Override
 	public <T> Iterable<T> loadAll( Class<T> interfaceClazz, Condition<T> condition ) throws ServiceProviderException {
 		return loadAll( interfaceClazz ).filter( condition );
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see trip.spi.InterfaceProvider#loadAll(java.lang.Class)
+	 */
+	@Override
 	@SuppressWarnings( "unchecked" )
 	public <T> Iterable<T> loadAll( Class<T> interfaceClazz ) throws ServiceProviderException {
 		Iterable<T> iterable = (Iterable<T>)this.injectables.get( interfaceClazz );
@@ -93,18 +146,45 @@ public class ServiceProvider {
 		return ServiceLoader.loadFrom( iterableInterfaces );
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see trip.spi.InterfaceProvider#loadClassImplementing(java.lang.Class,
+	 * java.lang.String)
+	 */
+	@Override
 	public <T> Class<T> loadClassImplementing( Class<T> interfaceClazz, String named ) {
 		return loadClassImplementing( interfaceClazz, new NamedClass<T>( named ) );
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see trip.spi.InterfaceProvider#loadClassImplementing(java.lang.Class,
+	 * trip.spi.helpers.filter.Condition)
+	 */
+	@Override
 	public <T> Class<T> loadClassImplementing( Class<T> interfaceClazz, Condition<Class<T>> condition ) {
 		return loadClassesImplementing( interfaceClazz ).first( condition );
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see trip.spi.InterfaceProvider#loadClassesImplementing(java.lang.Class,
+	 * trip.spi.helpers.filter.Condition)
+	 */
+	@Override
 	public <T> Iterable<Class<T>> loadClassesImplementing( Class<T> interfaceClazz, Condition<Class<T>> condition ) {
 		return loadClassesImplementing( interfaceClazz ).filter( condition );
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see trip.spi.InterfaceProvider#loadClassesImplementing(java.lang.Class)
+	 */
+	@Override
 	@SuppressWarnings( { "rawtypes", "unchecked" } )
 	public <T> Iterable<Class<T>> loadClassesImplementing( Class<T> interfaceClazz ) {
 		Iterable<Class<T>> implementations = (Iterable)implementedClasses.get( interfaceClazz );
@@ -127,44 +207,39 @@ public class ServiceProvider {
 		this.injectables.put( interfaceClazz, iterable );
 	}
 
-	protected <T> void provideOn( Iterable<T> iterable ) throws ServiceProviderException {
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see trip.spi.InterfaceProvider#provideOn(java.lang.Iterable)
+	 */
+	@Override
+	public <T> void provideOn( Iterable<T> iterable ) throws ServiceProviderException {
 		for ( T object : iterable )
 			provideOn( object );
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see trip.spi.InterfaceProvider#provideOn(java.lang.Object)
+	 */
+	@Override
 	public void provideOn( Object object ) throws ServiceProviderException {
+
 		try {
-			Class<? extends Object> clazz = object.getClass();
-			while ( !Object.class.equals( clazz ) ) {
-				provideOn( object, clazz );
-				clazz = clazz.getSuperclass();
-			}
-		} catch ( IllegalAccessException cause ) {
+			final ProvidableClass<?> providableClass = retrieveProvidableClass( object.getClass() );
+			providableClass.provide( object, this );
+		} catch ( IllegalArgumentException | IllegalAccessException cause ) {
 			throw new ServiceProviderException( cause );
 		}
 	}
 
-	protected void provideOn( Object object, Class<? extends Object> clazz ) throws IllegalAccessException, ServiceProviderException {
-		for ( Field field : clazz.getDeclaredFields() )
-			if ( field.isAnnotationPresent( Provided.class ) )
-				injectOnField( object, field );
-	}
-
-	@SuppressWarnings( "unchecked" )
-	protected <T> void injectOnField( Object object, Field field ) throws IllegalAccessException, ServiceProviderException {
-		field.setAccessible( true );
-		Condition<T> condition = (Condition<T>)extractInjectionFilterCondition( field );
-		Class<T> fieldType = (Class<T>)field.getType();
-		Object fieldValue = load( fieldType, condition, new FieldProviderContext( field ) );
-		if ( fieldValue != null )
-			provideOn( fieldValue );
-		field.set( object, fieldValue );
-	}
-
-	protected Condition<?> extractInjectionFilterCondition( Field field ) {
-		Name annotation = field.getAnnotation( Name.class );
-		if ( annotation == null )
-			return new AnyObject<Object>();
-		return new NamedObject<Object>( annotation.value() );
+	private ProvidableClass<?> retrieveProvidableClass( Class<?> targetClazz ) {
+		ProvidableClass<?> providableClass = providableClassCache.get( targetClazz );
+		if ( providableClass == null ) {
+			providableClass = ProvidableClass.wrap( targetClazz );
+			providableClassCache.put( targetClazz, providableClass );
+		}
+		return providableClass;
 	}
 }
