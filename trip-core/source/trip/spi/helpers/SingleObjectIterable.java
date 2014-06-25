@@ -6,20 +6,19 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class SingleObjectIterable<T> implements Iterable<T> {
-	
+
 	final T object;
 
 	@Override
 	public Iterator<T> iterator() {
-		return new SingleObjectIterator(object);
+		return new SingleObjectIterator( object );
 	}
 
 	@RequiredArgsConstructor
 	public class SingleObjectIterator implements Iterator<T> {
-		
+
 		final T object;
 		boolean firstCall = true;
-		
 
 		@Override
 		public boolean hasNext() {
@@ -35,6 +34,7 @@ public class SingleObjectIterable<T> implements Iterable<T> {
 		}
 
 		@Override
-		public void remove() {}
+		public void remove() {
+		}
 	}
 }

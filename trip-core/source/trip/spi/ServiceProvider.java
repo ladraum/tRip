@@ -26,6 +26,7 @@ public class ServiceProvider implements InterfaceProvider {
 	protected HashMap<Class<?>, Iterable<?>> createDefaultInjectables() {
 		val injectables = new HashMap<Class<?>, Iterable<?>>();
 		injectables.put( getClass(), new SingleObjectIterable<ServiceProvider>( this ) );
+		injectables.put( InterfaceProvider.class, new SingleObjectIterable<ServiceProvider>( this ) );
 		return injectables;
 	}
 
@@ -77,6 +78,26 @@ public class ServiceProvider implements InterfaceProvider {
 	@Override
 	public <T> T load( Class<T> interfaceClazz, ProviderContext context ) throws ServiceProviderException {
 		return load( interfaceClazz, new AnyObject<T>(), context );
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see trip.spi.InterfaceProvider#load(java.lang.Class, java.util.Map)
+	 */
+	@Override
+	public <T> T load( Class<T> interfaceClazz, Map<String, Object> contextData ) throws ServiceProviderException {
+		return load( interfaceClazz, new AnyObject<T>(), new KeyValueProviderContext( contextData ) );
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see trip.spi.InterfaceProvider#load(java.lang.Class, java.util.Map)
+	 */
+	@Override
+	public <T> T load( Class<T> interfaceClazz, String name, Map<String, Object> contextData ) throws ServiceProviderException {
+		return load( interfaceClazz, new NamedObject<T>( name ), new KeyValueProviderContext( contextData ) );
 	}
 
 	/*

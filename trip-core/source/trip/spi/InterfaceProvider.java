@@ -1,5 +1,7 @@
 package trip.spi;
 
+import java.util.Map;
+
 import trip.spi.helpers.filter.Condition;
 
 public interface InterfaceProvider {
@@ -30,6 +32,9 @@ public interface InterfaceProvider {
 
 	<T> void provideOn( Iterable<T> iterable ) throws ServiceProviderException;
 
-	void provideOn( Object object ) throws ServiceProviderException;
+	<T> T load( Class<T> interfaceClazz, Map<String, Object> contextData ) throws ServiceProviderException;
 
+	<T> T load( Class<T> interfaceClazz, String name, Map<String, Object> contextData ) throws ServiceProviderException;
+
+	void provideOn( Object object ) throws ServiceProviderException;
 }
