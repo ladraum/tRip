@@ -4,13 +4,11 @@ import static trip.spi.inject.NameTransformations.stripGenericsFrom;
 
 import java.util.List;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.DeclaredType;
+import javax.lang.model.element.*;
+import javax.lang.model.type.*;
 
+import trip.spi.*;
 import trip.spi.Name;
-import trip.spi.ProviderContext;
 
 public class FactoryProvidedClass {
 
@@ -22,38 +20,49 @@ public class FactoryProvidedClass {
 	final String typeName;
 	final String name;
 	final boolean expectsContext;
+	final String serviceFor;
 
 	public FactoryProvidedClass(
 			final String packageName, final String provider,
-			final String providerName,
 			final String providedMethod, final String type,
 			final String typeName, final String name,
-			final boolean expectsContext ) {
+			final boolean expectsContext,
+			final String serviceFor ) {
 		this.packageName = stripGenericsFrom( packageName );
 		this.provider = stripGenericsFrom( provider );
-		this.providerName = stripGenericsFrom( providerName );
 		this.providerMethod = stripGenericsFrom( providedMethod );
 		this.type = stripGenericsFrom( type );
 		this.typeName = stripGenericsFrom( typeName );
 		this.name = name;
 		this.expectsContext = expectsContext;
+		this.serviceFor = serviceFor;
+		this.providerName = String.valueOf( createIdentifier() );
+	}
+
+	private int createIdentifier() {
+		return String
+				.format( "%s%s%s%s%s%s%s",
+						packageName, provider, providerMethod,
+						type, typeName, name, expectsContext )
+				.hashCode();
 	}
 
 	public static FactoryProvidedClass from( Element element ) {
 		ExecutableElement method = assertElementIsMethod( element );
-		String providerName = method.getEnclosingElement().getSimpleName().toString();
-		String provider = method.getEnclosingElement().asType().toString();
+		TypeElement type = (TypeElement)method.getEnclosingElement();
+		String providerName = type.getSimpleName().toString();
+		String provider = type.asType().toString();
 		DeclaredType returnType = (DeclaredType)method.getReturnType();
-		String type = returnType.toString();
+		String typeAsString = returnType.toString();
 		String typeName = returnType.asElement().getSimpleName().toString();
 		return new FactoryProvidedClass(
 				provider.replace( "." + providerName, "" ),
 				provider,
-				provider.replace( ".", "Dot" ),
 				method.getSimpleName().toString(),
-				type, typeName,
+				typeAsString, typeName,
 				extractNameFrom( element ),
-				measureIfExpectsContextAsParameter( method ) );
+				measureIfExpectsContextAsParameter( method ),
+				getProvidedServiceClass( type ) );
 	}
 
 	static boolean measureIfExpectsContextAsParameter( ExecutableElement method ) {
@@ -65,6 +74,30 @@ public class FactoryProvidedClass {
 			throw new IllegalStateException(
 					"@Provider annotated methods should have no parameters, or the parameter should be of type ProviderContext." );
 		return true;
+	}
+
+	private static String getProvidedServiceClass( TypeElement type ) {
+		TypeMirror providedClass = getProvidedServiceAsTypeMirror( type );
+		if ( providedClass == null )
+			return null;
+		if ( isAnnotationBlank( providedClass ) )
+			return type.asType().toString();
+		return providedClass.toString();
+	}
+
+	private static boolean isAnnotationBlank( TypeMirror providedClass ) {
+		return providedClass.toString().equals( Service.class.getCanonicalName() );
+	}
+
+	private static TypeMirror getProvidedServiceAsTypeMirror( TypeElement type ) {
+		try {
+			Service provides = type.getAnnotation( Service.class );
+			if ( provides != null )
+				provides.value();
+			return null;
+		} catch ( MirroredTypeException cause ) {
+			return cause.getTypeMirror();
+		}
 	}
 
 	static String extractNameFrom( Element element ) {
