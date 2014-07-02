@@ -72,12 +72,23 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 
 	void createAProviderFactoryClassFrom( FactoryProvidedClass clazz ) throws IOException {
 		String name = createClassCanonicalName( clazz );
-		System.out.println( "Generating " + name );
-		JavaFileObject sourceFile = filer().createSourceFile( name );
-		Writer writer = sourceFile.openWriter();
-		this.providedClazzTemplate.execute( writer, clazz );
-		writer.close();
-		memorizeProvider( name );
+		if ( !classExists( clazz, name ) ) {
+			System.out.println( "Generating " + name );
+			JavaFileObject sourceFile = filer().createSourceFile( name );
+			Writer writer = sourceFile.openWriter();
+			this.providedClazzTemplate.execute( writer, clazz );
+			writer.close();
+			memorizeProvider( name );
+		}
+	}
+
+	boolean classExists( FactoryProvidedClass clazz, String name ) {
+		try {
+			Class.forName( name );
+			return true;
+		} catch ( IllegalArgumentException | ClassNotFoundException cause ) {
+			return false;
+		}
 	}
 
 	String createClassCanonicalName( FactoryProvidedClass clazz ) {

@@ -39,12 +39,14 @@ public class FactoryProvidedClass {
 		this.providerName = String.valueOf( createIdentifier() );
 	}
 
-	private int createIdentifier() {
-		return String
-				.format( "%s%s%s%s%s%s%s",
+	private long createIdentifier() {
+		int hashCode =
+				String.format( "%s%s%s%s%s%s%s",
 						packageName, provider, providerMethod,
 						type, typeName, name, expectsContext )
-				.hashCode();
+						.hashCode();
+
+		return hashCode & 0xffffffffl;
 	}
 
 	public static FactoryProvidedClass from( Element element ) {
@@ -135,4 +137,7 @@ public class FactoryProvidedClass {
 		return this.typeName;
 	}
 
+	public String name() {
+		return this.name;
+	}
 }
