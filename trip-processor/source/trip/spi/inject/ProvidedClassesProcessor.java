@@ -124,7 +124,7 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 	}
 
 	Writer createResource( String resourcePath ) throws IOException {
-		FileObject resource = filer().getResource( StandardLocation.SOURCE_OUTPUT, "", resourcePath );
+		FileObject resource = filer().getResource( StandardLocation.CLASS_OUTPUT, "", resourcePath );
 		URI uri = resource.toUri();
 		createNeededDirectoriesTo( uri );
 		File file = createFile( uri );
