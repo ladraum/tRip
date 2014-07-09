@@ -28,7 +28,7 @@ public class ProvidableClass<T> {
 		List<ProvidableField> providableFields = new ArrayList<ProvidableField>();
 		Class<? extends Object> clazz = targetClazz;
 		while ( !Object.class.equals( clazz ) ) {
-			populateWithProvidableFields( targetClazz, providableFields );
+			populateWithProvidableFields( clazz, providableFields );
 			clazz = clazz.getSuperclass();
 		}
 		return providableFields;
