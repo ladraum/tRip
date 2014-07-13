@@ -4,11 +4,18 @@ import static trip.spi.inject.NameTransformations.stripGenericsFrom;
 
 import java.util.List;
 
-import javax.lang.model.element.*;
-import javax.lang.model.type.*;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.MirroredTypeException;
+import javax.lang.model.type.TypeMirror;
 
-import trip.spi.*;
 import trip.spi.Name;
+import trip.spi.ProviderContext;
+import trip.spi.Singleton;
+import trip.spi.Stateless;
 
 public class ProducerImplementation {
 
@@ -21,13 +28,14 @@ public class ProducerImplementation {
 	final String name;
 	final boolean expectsContext;
 	final String serviceFor;
+	final boolean stateless;
 
 	public ProducerImplementation(
 			final String packageName, final String provider,
 			final String providedMethod, final String type,
 			final String typeName, final String name,
 			final boolean expectsContext,
-			final String serviceFor ) {
+			final String serviceFor, final boolean stateless ) {
 		this.packageName = stripGenericsFrom( packageName );
 		this.provider = stripGenericsFrom( provider );
 		this.providerMethod = stripGenericsFrom( providedMethod );
@@ -37,19 +45,29 @@ public class ProducerImplementation {
 		this.expectsContext = expectsContext;
 		this.serviceFor = serviceFor;
 		this.providerName = String.valueOf( createIdentifier() );
+		this.stateless = stateless;
 	}
 
 	private long createIdentifier() {
 		int hashCode =
-				String.format( "%s%s%s%s%s%s%s",
+				String.format( "%s%s%s%s%s%s%s%s",
 						packageName, provider, providerMethod,
-						type, typeName, name, expectsContext )
+						type, typeName, name, expectsContext, stateless )
 						.hashCode();
 
 		return hashCode & 0xffffffffl;
 	}
 
-	public static ProducerImplementation from( Element element ) {
+	public static ProducerImplementation from( TypeElement type ) {
+		String providerName = type.getSimpleName().toString();
+		String provider = type.asType().toString();
+		return new ProducerImplementation(
+				provider.replace( "." + providerName, "" ),
+				provider, "", provider, "",
+				extractNameFrom( type ), false, "", true );
+	}
+
+	public static ProducerImplementation from( ExecutableElement element ) {
 		ExecutableElement method = assertElementIsMethod( element );
 		TypeElement type = (TypeElement)method.getEnclosingElement();
 		String providerName = type.getSimpleName().toString();
@@ -62,9 +80,9 @@ public class ProducerImplementation {
 				provider,
 				method.getSimpleName().toString(),
 				typeAsString, typeName,
-				extractNameFrom( element ),
+				extractNameFrom( method ),
 				measureIfExpectsContextAsParameter( method ),
-				getProvidedServiceClass( type ) );
+				getProvidedServiceClassForSingleton( type ), false );
 	}
 
 	static boolean measureIfExpectsContextAsParameter( ExecutableElement method ) {
@@ -78,28 +96,34 @@ public class ProducerImplementation {
 		return true;
 	}
 
-	private static String getProvidedServiceClass( TypeElement type ) {
-		TypeMirror providedClass = getProvidedServiceAsTypeMirror( type );
+	private static String getProvidedServiceClassForSingleton( TypeElement type ) {
+		if ( isAnnotatedForStateless(type) )
+			return type.asType().toString();
+		TypeMirror providedClass = getProvidedSingletonAsTypeMirror( type );
 		if ( providedClass == null )
 			return null;
-		if ( isAnnotationBlank( providedClass ) )
+		if ( isSingletonAnnotationBlank( providedClass ) )
 			return type.asType().toString();
 		return providedClass.toString();
 	}
 
-	private static boolean isAnnotationBlank( TypeMirror providedClass ) {
-		return providedClass.toString().equals( Singleton.class.getCanonicalName() );
-	}
-
-	private static TypeMirror getProvidedServiceAsTypeMirror( TypeElement type ) {
+	private static TypeMirror getProvidedSingletonAsTypeMirror( TypeElement type ) {
 		try {
-			Singleton provides = type.getAnnotation( Singleton.class );
-			if ( provides != null )
-				provides.value();
+			Singleton singleton = type.getAnnotation( Singleton.class );
+			if ( singleton != null )
+				singleton.value();
 			return null;
 		} catch ( MirroredTypeException cause ) {
 			return cause.getTypeMirror();
 		}
+	}
+
+	private static boolean isSingletonAnnotationBlank( TypeMirror providedClass ) {
+		return providedClass.toString().equals( Singleton.class.getCanonicalName() );
+	}
+	
+	private static boolean isAnnotatedForStateless( TypeElement type ){
+		return type.getAnnotation( Stateless.class ) != null;
 	}
 
 	static String extractNameFrom( Element element ) {

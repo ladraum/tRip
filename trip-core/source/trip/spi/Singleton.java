@@ -10,6 +10,4 @@ import java.lang.annotation.Target;
 public @interface Singleton {
 
 	Class<?> value() default Singleton.class;
-
-	boolean singleton() default true;
 }

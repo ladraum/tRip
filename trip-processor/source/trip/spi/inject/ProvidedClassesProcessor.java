@@ -1,19 +1,37 @@
 package trip.spi.inject;
 
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Mustache;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import javax.annotation.processing.*;
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Filer;
+import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.*;
-import javax.tools.*;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.tools.FileObject;
+import javax.tools.JavaFileObject;
+import javax.tools.StandardLocation;
 
-import trip.spi.*;
+import trip.spi.Producer;
+import trip.spi.ProviderFactory;
+import trip.spi.Singleton;
+import trip.spi.Stateless;
+
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
 
 @SupportedAnnotationTypes( "trip.spi.*" )
 public class ProvidedClassesProcessor extends AbstractProcessor {
@@ -23,7 +41,7 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 	static final String PROVIDER_FILE = SERVICES + ProviderFactory.class.getCanonicalName();
 
 	final DefaultMustacheFactory mustacheFactory = new DefaultMustacheFactory();
-	final Mustache providedClazzTemplate = this.mustacheFactory.compile( "META-INF/provided-class.mustache" );
+	final Mustache factoryProviderClazzTemplate = this.mustacheFactory.compile( "META-INF/provided-class.mustache" );
 	final List<String> producers = new ArrayList<>();
 	final Map<String, List<String>> singletons = new HashMap<>();
 
@@ -39,6 +57,7 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 
 	void process( RoundEnvironment roundEnv ) throws IOException {
 		processSingletons( roundEnv, Singleton.class );
+		processProducers( roundEnv, Stateless.class );
 		processProducers( roundEnv, Producer.class );
 		if ( !this.producers.isEmpty() )
 			createServiceProviderForProducers();
@@ -67,7 +86,9 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 		Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith( annotation );
 		for ( Element element : annotatedElements )
 			if ( element.getKind() == ElementKind.METHOD )
-				createAProducerFrom( ProducerImplementation.from( element ) );
+				createAProducerFrom( ProducerImplementation.from( (ExecutableElement)element ) );
+			else if ( element.getKind() == ElementKind.CLASS )
+				createAProducerFrom( ProducerImplementation.from( (TypeElement)element ) );
 	}
 
 	void createAProducerFrom( ProducerImplementation clazz ) throws IOException {
@@ -76,7 +97,7 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 			System.out.println( "Generating " + name );
 			JavaFileObject sourceFile = filer().createSourceFile( name );
 			Writer writer = sourceFile.openWriter();
-			this.providedClazzTemplate.execute( writer, clazz );
+			this.factoryProviderClazzTemplate.execute( writer, clazz );
 			writer.close();
 			memorizeProvider( name );
 		}

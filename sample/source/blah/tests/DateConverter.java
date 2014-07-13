@@ -6,9 +6,9 @@ import java.util.Date;
 
 import trip.spi.Name;
 import trip.spi.Provided;
-import trip.spi.Service;
+import trip.spi.Singleton;
 
-@Service
+@Singleton
 public class DateConverter implements Converter<Date> {
 
 	@Provided

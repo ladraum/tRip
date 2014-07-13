@@ -6,7 +6,7 @@ import trip.spi.Producer;
 import trip.spi.Singleton;
 
 @Singleton
-public class ProvidedProducerOfIntegers {
+public class SingletonProvidedProducerOfIntegers {
 
 	final AtomicInteger counter = new AtomicInteger();
 
