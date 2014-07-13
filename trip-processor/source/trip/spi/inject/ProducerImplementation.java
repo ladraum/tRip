@@ -10,7 +10,7 @@ import javax.lang.model.type.*;
 import trip.spi.*;
 import trip.spi.Name;
 
-public class FactoryProvidedClass {
+public class ProducerImplementation {
 
 	final String packageName;
 	final String provider;
@@ -22,7 +22,7 @@ public class FactoryProvidedClass {
 	final boolean expectsContext;
 	final String serviceFor;
 
-	public FactoryProvidedClass(
+	public ProducerImplementation(
 			final String packageName, final String provider,
 			final String providedMethod, final String type,
 			final String typeName, final String name,
@@ -49,7 +49,7 @@ public class FactoryProvidedClass {
 		return hashCode & 0xffffffffl;
 	}
 
-	public static FactoryProvidedClass from( Element element ) {
+	public static ProducerImplementation from( Element element ) {
 		ExecutableElement method = assertElementIsMethod( element );
 		TypeElement type = (TypeElement)method.getEnclosingElement();
 		String providerName = type.getSimpleName().toString();
@@ -57,7 +57,7 @@ public class FactoryProvidedClass {
 		DeclaredType returnType = (DeclaredType)method.getReturnType();
 		String typeAsString = returnType.toString();
 		String typeName = returnType.asElement().getSimpleName().toString();
-		return new FactoryProvidedClass(
+		return new ProducerImplementation(
 				provider.replace( "." + providerName, "" ),
 				provider,
 				method.getSimpleName().toString(),
@@ -88,12 +88,12 @@ public class FactoryProvidedClass {
 	}
 
 	private static boolean isAnnotationBlank( TypeMirror providedClass ) {
-		return providedClass.toString().equals( Service.class.getCanonicalName() );
+		return providedClass.toString().equals( Singleton.class.getCanonicalName() );
 	}
 
 	private static TypeMirror getProvidedServiceAsTypeMirror( TypeElement type ) {
 		try {
-			Service provides = type.getAnnotation( Service.class );
+			Singleton provides = type.getAnnotation( Singleton.class );
 			if ( provides != null )
 				provides.value();
 			return null;

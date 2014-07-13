@@ -9,24 +9,24 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.type.TypeMirror;
 
-import trip.spi.Service;
+import trip.spi.Singleton;
 
-public class ProviderImplementation {
+public class SingletonImplementation {
 
 	final String interfaceClass;
 	final String implementationClass;
 
-	public ProviderImplementation(
+	public SingletonImplementation(
 			String interfaceClass, String implementationClass ) {
 		this.interfaceClass = stripGenericsFrom( interfaceClass );
 		this.implementationClass = stripGenericsFrom( implementationClass );
 	}
 
-	public static ProviderImplementation from( Element element ) {
+	public static SingletonImplementation from( Element element ) {
 		TypeElement type = (TypeElement)element;
 		List<? extends TypeMirror> interfaces = type.getInterfaces();
 		String interfaceClass = extractValidProvider( type, interfaces );
-		return new ProviderImplementation( interfaceClass, type.asType().toString() );
+		return new SingletonImplementation( interfaceClass, type.asType().toString() );
 	}
 
 	private static String extractValidProvider( TypeElement type, List<? extends TypeMirror> interfaces ) {
@@ -41,12 +41,12 @@ public class ProviderImplementation {
 	}
 
 	private static boolean isAnnotationBlank( TypeMirror providedClass ) {
-		return providedClass.toString().equals( Service.class.getCanonicalName() );
+		return providedClass.toString().equals( Singleton.class.getCanonicalName() );
 	}
 
 	private static TypeMirror getProvidedClass( TypeElement type ) {
 		try {
-			Service provides = type.getAnnotation( Service.class );
+			Singleton provides = type.getAnnotation( Singleton.class );
 			provides.value();
 			return null;
 		} catch ( MirroredTypeException cause ) {

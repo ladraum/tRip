@@ -3,9 +3,9 @@ package trip.spi.tests;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import trip.spi.Producer;
-import trip.spi.Service;
+import trip.spi.Singleton;
 
-@Service
+@Singleton
 public class ProvidedProducerOfIntegers {
 
 	final AtomicInteger counter = new AtomicInteger();

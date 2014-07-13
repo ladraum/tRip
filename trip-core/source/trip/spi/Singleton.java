@@ -7,9 +7,9 @@ import java.lang.annotation.Target;
 
 @Retention( RetentionPolicy.RUNTIME )
 @Target( { ElementType.TYPE } )
-public @interface Service {
+public @interface Singleton {
 
-	Class<?> value() default Service.class;
+	Class<?> value() default Singleton.class;
 
 	boolean singleton() default true;
 }

@@ -2,10 +2,10 @@ package trip.spi.tests;
 
 import trip.spi.Name;
 import trip.spi.Provided;
-import trip.spi.Service;
+import trip.spi.Singleton;
 
 @Name( "ajax" )
-@Service( Hero.class )
+@Singleton( Hero.class )
 public class AjaxFromMars implements Hero, World {
 
 	@Provided

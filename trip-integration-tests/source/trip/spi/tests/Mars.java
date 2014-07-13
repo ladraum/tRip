@@ -1,8 +1,8 @@
 package trip.spi.tests;
 
-import trip.spi.Service;
+import trip.spi.Singleton;
 
-@Service
+@Singleton
 public class Mars implements World {
 
 	@Override

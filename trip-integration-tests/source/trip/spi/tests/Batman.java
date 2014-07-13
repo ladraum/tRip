@@ -3,9 +3,9 @@ package trip.spi.tests;
 import lombok.Delegate;
 import trip.spi.Name;
 import trip.spi.Provided;
-import trip.spi.Service;
+import trip.spi.Singleton;
 
-@Service( Hero.class )
+@Singleton( Hero.class )
 @Name( "batman" )
 public class Batman implements Hero, World {
 
