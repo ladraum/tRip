@@ -17,65 +17,73 @@ tRip is useful *for JVM library developers* when:
 - Other CI warm-up time is too long
 - You have experimenting other IoC/DI implementations but there's no dependency discovery algorithm and I should manually provide its producers
 
-## Getting started
-Imagine a cenario where you should calculate the month payment. And you have different stora and source's of data for any customer you should apply this calculation algorithm. To achieve this goal, we've defined the ```Storage``` and the ```SourceOfData``` interfaces. Both should have at least one implementation for each customer on class path.
-
+## Usage
+You can provide interface implementations:
 ```java
 public interface Storage {
 	void store( Object data );
 }
 
-public interface SourceOfData {
-	List<Object> retrieve( Map<String, Object> filter );
-}
-```
-
-Bellow we provide a sample Storage implementation that stores data into a java.util.List object. The same could be also applied to the SourceOfData interface, but was ommited to keep the sample simple.
-```java
 @Singleton
-public class ListStorage implements Storage {
+public class IndexedStorage implements Storage {
+	Map<Long, List<Object>> indexById = new HashMap<>();
 
-	final List<Object> storage = new ArrayList<Object>();
-
-	public void store( Object data ) {
-		storage.add( data );
+	public void store( long id, Object data ) {
+		List<Object> dataForId = indexById.get( id );
+		// XXX: apply validations and check for null data
+		dataForId.add( data );
 	}
 }
 ```
 
-Let's see how we could make a totally decoupled calculation job.
-```
+You can create managed services that will receive interface implementations:
+```java
 @Stateless
-public class MonthPaymentCalculationJob implements Runnable {
+public class MonthPaymentCalculation {
 
-	@Provided
-	Storage storage;
-
-	@Provided
-	SourceOfData source;
-
-	public void run() {
-		Map<String, Object> filter = createFilter();
-		List<Object> data = source.retrieve( filter );
-		applyValidations( data );
-		storage.store( data );
-	}
-
-	// another methods
-}
-
-public class Main {
-	// main method
-	public void main( String[] args ) {
-		final ServiceProvider provider = new ServiceProvider();
-		final Runnable job = provider.load( Runnable.class );
-		new Thread( job ).start();
+	@Provided Storage storage;
+	
+	public void calculate( Emploeye employee ) {
+		// XXX: do some calculation
+		storage.store( employee.getId(), employee );
 	}
 }
 ```
-That's it, the ServiceProvider is able to find the interface implementations and inject the needed data into your services.
 
-## Configuring project for maven
+You can run your software without repetitive injection definitions. Just load your main class and let tRip provide implementations for you:
+```java
+public class Main {
+
+	static final int THIRD_FIVE_HOURS = 35;
+	static final int ACME_COMPANY = 13;
+
+	public void main( String[] args ){
+		final ServiceProvider provider = new ServiceProvider();
+		MonthPaymentCalculation paymentCalculation = provider.load( MonthPaymentCalculation.class );
+		final Emploeye employee = Emploeye.thatWorks( THIRD_FIVE_HOURS ).forCompany( ACME_COMPANY );
+		paymentCalculation.calculate( employee );
+	}
+}
+```
+Please read the [detailed Getting Started guide](https://github.com/Skullabs/tRip/wiki/tRip:-detailed-Getting-Started-guide) for more details and features.
+
+## Main Features
+tRip was designed to:
+- Take care of Singleton's and Stateless' services for your
+- Allow you to create modules and extensions to your software without change one LOC in the core implementation
+- Fast warm-up: tRip already knows what to provide in compilation phase, there's no need to look into the entire class-path for provided classes
+- Zero configuration: just let the [ServiceProvider](https://github.com/Skullabs/tRip/wiki/tRip:-detailed-Getting-Started-guide) run the software for you
+- Factory-based creation of services: you can take control of how a service is provided creating your own factory
+- Manually provided data: you still can provide data manually to your software context.
+
+You can see all these features ( and a few more ) in the [detailed Getting Started guide](https://github.com/Skullabs/tRip/wiki/tRip:-detailed-Getting-Started-guide).
+
+## Low footprint
+tRip is basically two jars:
+- trip-core ( 18kb ): which is needed to run your application
+- trip-processor ( 11kb ): which is responsible by the auto discovery of Singleton's and Stateless' services on your modules. This dependency is needed only during compilation phase.
+
+## Maven ready
 Configuring a maven project is easy. Just include the following repository and dependency configuration on its respecitve places on your pom.xml.
 
 ```xml
