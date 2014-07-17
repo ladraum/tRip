@@ -2,6 +2,7 @@ package trip.spi.tests;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -42,5 +43,11 @@ public class SingletonsAndStatelessProducerTest {
 		assertThat( producerOfShorts.produceShort(), is( (short)0 ) );
 		producerOfShorts = provider.load( ProducerOfShorts.class );
 		assertThat( producerOfShorts.produceShort(), is( (short)0 ) );
+	}
+
+	@Test
+	public void ensureThatCanListStatelessClassForProducerOfShort() {
+		Class<ProducerOfShorts> implementation = provider.loadClassImplementing( ProducerOfShorts.class );
+		assertTrue( implementation.equals( StatelessProvidedProducerOfShorts.class ) );
 	}
 }

@@ -57,7 +57,8 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 	}
 
 	void process( RoundEnvironment roundEnv ) throws IOException {
-		processSingletons( roundEnv, Singleton.class );
+		memorizeServicesAnnotatedWith( roundEnv, Singleton.class );
+		memorizeServicesAnnotatedWith( roundEnv, Stateless.class );
 		processProducers( roundEnv, Stateless.class );
 		processProducers( roundEnv, Producer.class );
 		if ( !this.producers.isEmpty() )
@@ -67,14 +68,14 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 		flush();
 	}
 
-	void processSingletons( RoundEnvironment roundEnv, Class<? extends Annotation> annotation ) {
+	void memorizeServicesAnnotatedWith( RoundEnvironment roundEnv, Class<? extends Annotation> annotation ) {
 		Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith( annotation );
 		for ( Element element : annotatedElements )
 			if ( element.getKind() == ElementKind.CLASS )
-				memorizeASingletonImplementation( SingletonImplementation.from( element ) );
+				memorizeASingletonImplementation( ServiceImplementation.from( element ) );
 	}
 
-	void memorizeASingletonImplementation( SingletonImplementation from ) {
+	void memorizeASingletonImplementation( ServiceImplementation from ) {
 		Set<String> list = this.singletons.get( from.interfaceClass() );// ,
 		if ( list == null ) {
 			list = readAListWithAllCreatedClassesImplementing( from.interfaceClass() );

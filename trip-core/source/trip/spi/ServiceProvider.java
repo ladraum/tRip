@@ -6,9 +6,18 @@ import java.util.Map;
 
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
-import trip.spi.helpers.*;
+import trip.spi.helpers.EmptyProviderContext;
+import trip.spi.helpers.KeyValueProviderContext;
+import trip.spi.helpers.ProvidableClass;
+import trip.spi.helpers.ProviderFactoryMap;
+import trip.spi.helpers.SingleObjectIterable;
 import trip.spi.helpers.cache.ServiceLoader;
-import trip.spi.helpers.filter.*;
+import trip.spi.helpers.filter.AnyClass;
+import trip.spi.helpers.filter.AnyObject;
+import trip.spi.helpers.filter.Condition;
+import trip.spi.helpers.filter.Filter;
+import trip.spi.helpers.filter.NamedClass;
+import trip.spi.helpers.filter.NamedObject;
 
 @ExtensionMethod( Filter.class )
 public class ServiceProvider implements InterfaceProvider {
@@ -165,6 +174,10 @@ public class ServiceProvider implements InterfaceProvider {
 			Class<T> interfaceClazz ) throws ServiceProviderException {
 		Iterable<Class<T>> iterableInterfaces = loadClassesImplementing( interfaceClazz );
 		return ServiceLoader.loadFrom( iterableInterfaces );
+	}
+
+	public <T> Class<T> loadClassImplementing( Class<T> interfaceClazz ) {
+		return loadClassImplementing( interfaceClazz, new AnyClass<T>() );
 	}
 
 	/*
