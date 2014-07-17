@@ -27,16 +27,20 @@ public class LazyClassReader<S> implements Iterator<Class<S>> {
     @Getter( lazy=true )
 	private final Enumeration<URL> resources = readAllServiceResources();
 
-	final Class<S> serviceClass;
+	final String serviceClassCanonicalName;
     final ClassLoader loader;
 	Iterator<String> currentResourceLines;
 
+	public LazyClassReader( Class<S> serviceClass, ClassLoader loader ) {
+		this( serviceClass.getCanonicalName(), loader );
+	}
+
 	Enumeration<URL> readAllServiceResources() {
 		try {
-			String fullName = PREFIX + serviceClass.getCanonicalName();
+			String fullName = PREFIX + serviceClassCanonicalName;
 			return loader.getResources(fullName);
 		} catch (IOException cause) {
-			throw new ServiceConfigurationError(serviceClass.getCanonicalName() + ": " + cause.getMessage(), cause);
+			throw new ServiceConfigurationError( serviceClassCanonicalName + ": " + cause.getMessage(), cause );
 		}
 	}
 

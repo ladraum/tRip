@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,6 +29,7 @@ import trip.spi.Producer;
 import trip.spi.ProviderFactory;
 import trip.spi.Singleton;
 import trip.spi.Stateless;
+import trip.spi.helpers.cache.ServiceLoader;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
@@ -42,8 +43,8 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 
 	final DefaultMustacheFactory mustacheFactory = new DefaultMustacheFactory();
 	final Mustache factoryProviderClazzTemplate = this.mustacheFactory.compile( "META-INF/provided-class.mustache" );
-	final List<String> producers = new ArrayList<>();
-	final Map<String, List<String>> singletons = new HashMap<>();
+	final Set<String> producers = readAListWithAllCreatedClassesImplementing( ProviderFactory.class );
+	final Map<String, Set<String>> singletons = new HashMap<>();
 
 	@Override
 	public boolean process( Set<? extends TypeElement> annotations, RoundEnvironment roundEnv ) {
@@ -74,12 +75,23 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 	}
 
 	void memorizeASingletonImplementation( SingletonImplementation from ) {
-		List<String> list = this.singletons.get( from.interfaceClass() );// ,
+		Set<String> list = this.singletons.get( from.interfaceClass() );// ,
 		if ( list == null ) {
-			list = new ArrayList<>();
+			list = readAListWithAllCreatedClassesImplementing( from.interfaceClass() );
 			this.singletons.put( from.interfaceClass(), list );
 		}
 		list.add( from.implementationClass() );
+	}
+
+	private HashSet<String> readAListWithAllCreatedClassesImplementing( Class<?> interfaceClass ) {
+		return readAListWithAllCreatedClassesImplementing( interfaceClass.getCanonicalName() );
+	}
+
+	private HashSet<String> readAListWithAllCreatedClassesImplementing( String interfaceClass ) {
+		final LinkedHashSet<String> singletons = new LinkedHashSet<>();
+		for ( Class<?> implementationClass : ServiceLoader.loadImplementationsFor( interfaceClass ) )
+			singletons.add( implementationClass.getCanonicalName() );
+		return singletons;
 	}
 
 	void processProducers( RoundEnvironment roundEnv, Class<? extends Annotation> annotation ) throws IOException {
