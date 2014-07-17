@@ -2,7 +2,6 @@ package trip.spi.tests;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import lombok.val;
 
 import org.junit.Test;
 
@@ -29,7 +28,7 @@ public class SingletonsAndStatelessProducerTest {
 	
 	@Test
 	public void ensureThatCanProduceUnrepeatedShortsWhenManuallyCreated(){
-		val producerOfShorts = new StatelessProvidedProducerOfShorts();
+		ProducerOfShorts producerOfShorts = new StatelessProvidedProducerOfShorts();
 		assertThat( producerOfShorts.produceShort(), is( (short)0 ) );
 		assertThat( producerOfShorts.produceShort(), is( (short)1 ) );
 		assertThat( producerOfShorts.produceShort(), is( (short)2 ) );
@@ -37,11 +36,11 @@ public class SingletonsAndStatelessProducerTest {
 	
 	@Test
 	public void ensureThatCantProduceUnrepeatedShortsWhenCreatedByServiceProvider() throws ServiceProviderException{
-		StatelessProvidedProducerOfShorts producerOfShorts = provider.load(StatelessProvidedProducerOfShorts.class);
+		ProducerOfShorts producerOfShorts = provider.load( ProducerOfShorts.class );
 		assertThat( producerOfShorts.produceShort(), is( (short)0 ) );
-		producerOfShorts = provider.load(StatelessProvidedProducerOfShorts.class);
+		producerOfShorts = provider.load( ProducerOfShorts.class );
 		assertThat( producerOfShorts.produceShort(), is( (short)0 ) );
-		producerOfShorts = provider.load(StatelessProvidedProducerOfShorts.class);
+		producerOfShorts = provider.load( ProducerOfShorts.class );
 		assertThat( producerOfShorts.produceShort(), is( (short)0 ) );
 	}
 }
