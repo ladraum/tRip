@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
-import trip.spi.*;
+import trip.spi.Provided;
+import trip.spi.ServiceProvider;
+import trip.spi.ServiceProviderException;
 
 @RequiredArgsConstructor
 @SuppressWarnings( "rawtypes" )
@@ -14,7 +16,7 @@ public class ProvidableClass<T> {
 	final Class<T> targetClazz;
 	final Iterable<ProvidableField> fields;
 
-	public void provide( Object instance, InterfaceProvider provider )
+	public void provide( Object instance, ServiceProvider provider )
 			throws ServiceProviderException, IllegalArgumentException, IllegalAccessException {
 		for ( ProvidableField field : fields )
 			field.provide( instance, provider );

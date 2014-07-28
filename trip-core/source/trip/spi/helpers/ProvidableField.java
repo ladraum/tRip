@@ -3,8 +3,13 @@ package trip.spi.helpers;
 import java.lang.reflect.Field;
 
 import lombok.Value;
-import trip.spi.*;
-import trip.spi.helpers.filter.*;
+import trip.spi.Name;
+import trip.spi.ProviderContext;
+import trip.spi.ServiceProvider;
+import trip.spi.ServiceProviderException;
+import trip.spi.helpers.filter.AnyObject;
+import trip.spi.helpers.filter.Condition;
+import trip.spi.helpers.filter.NamedObject;
 
 @Value
 public class ProvidableField<T> {
@@ -14,7 +19,7 @@ public class ProvidableField<T> {
 	final Condition<T> condition;
 	final ProviderContext providerContext;
 
-	public void provide( Object instance, InterfaceProvider provider )
+	public void provide( Object instance, ServiceProvider provider )
 			throws ServiceProviderException, IllegalArgumentException, IllegalAccessException {
 		Object value = provider.load( fieldType, condition, providerContext );
 		set( instance, value );
