@@ -42,60 +42,62 @@ public class ServiceProvider {
 	protected ProviderFactoryMap loadAllProviders() {
 		try {
 			return ProviderFactoryMap.from( loadSingletons( ProviderFactory.class ) );
-		} catch ( ServiceProviderException e ) {
+		} catch ( final ServiceProviderException e ) {
 			throw new IllegalStateException( e );
 		}
 	}
 
-	public <T> T load( Class<T> interfaceClazz ) throws ServiceProviderException {
+	public <T> T load( final Class<T> interfaceClazz ) throws ServiceProviderException {
 		return load( interfaceClazz, new AnyObject<T>() );
 	}
 
-	public <T> T load( Class<T> interfaceClazz, String name ) throws ServiceProviderException {
+	public <T> T load( final Class<T> interfaceClazz, final String name ) throws ServiceProviderException {
 		return load( interfaceClazz, new NamedObject<T>( name ) );
 	}
 
-	public <T> T load( Class<T> interfaceClazz, Condition<T> condition ) throws ServiceProviderException {
+	public <T> T load( final Class<T> interfaceClazz, final Condition<T> condition ) throws ServiceProviderException {
 		return load( interfaceClazz, condition, new EmptyProviderContext() );
 	}
 
-	public <T> T load( Class<T> interfaceClazz, ProviderContext context ) throws ServiceProviderException {
+	public <T> T load( final Class<T> interfaceClazz, final ProviderContext context ) throws ServiceProviderException {
 		return load( interfaceClazz, new AnyObject<T>(), context );
 	}
 
-	public <T> T load( Class<T> interfaceClazz, Map<String, Object> contextData ) throws ServiceProviderException {
+	public <T> T load( final Class<T> interfaceClazz, final Map<String, Object> contextData ) throws ServiceProviderException {
 		return load( interfaceClazz, new AnyObject<T>(), new KeyValueProviderContext( contextData ) );
 	}
 
-	public <T> T load( Class<T> interfaceClazz, String name, Map<String, Object> contextData ) throws ServiceProviderException {
+	public <T> T load( final Class<T> interfaceClazz, final String name, final Map<String, Object> contextData )
+			throws ServiceProviderException {
 		return load( interfaceClazz, new NamedObject<T>( name ), new KeyValueProviderContext( contextData ) );
 	}
 
-	public <T> T load( Class<T> interfaceClazz, Condition<T> condition, ProviderContext context ) throws ServiceProviderException {
-		T produced = produceFromFactory( interfaceClazz, condition, context );
+	public <T> T load( final Class<T> interfaceClazz, final Condition<T> condition, final ProviderContext context )
+			throws ServiceProviderException {
+		final T produced = produceFromFactory( interfaceClazz, condition, context );
 		if ( produced != null )
 			return produced;
 		return loadSingletons( interfaceClazz, condition ).first( condition );
 	}
 
 	@SuppressWarnings( "unchecked" )
-	private <T> ProviderFactory<T> getProviderFor( Class<T> interfaceClazz,
-			Condition<T> condition ) {
+	private <T> ProviderFactory<T> getProviderFor( final Class<T> interfaceClazz,
+			final Condition<T> condition ) {
 		if ( this.providers == null )
 			return null;
 		return (ProviderFactory<T>)this.providers.get( interfaceClazz, condition );
 	}
 
-	public <T> Iterable<T> loadSingletons( Class<T> interfaceClazz, String name ) throws ServiceProviderException {
+	public <T> Iterable<T> loadSingletons( final Class<T> interfaceClazz, final String name ) throws ServiceProviderException {
 		return loadSingletons( interfaceClazz, new NamedObject<T>( name ) );
 	}
 
-	public <T> Iterable<T> loadSingletons( Class<T> interfaceClazz, Condition<T> condition ) throws ServiceProviderException {
+	public <T> Iterable<T> loadSingletons( final Class<T> interfaceClazz, final Condition<T> condition ) throws ServiceProviderException {
 		return loadSingletons( interfaceClazz ).filter( condition );
 	}
 
 	@SuppressWarnings( "unchecked" )
-	public <T> Iterable<T> loadSingletons( Class<T> interfaceClazz ) throws ServiceProviderException {
+	public <T> Iterable<T> loadSingletons( final Class<T> interfaceClazz ) throws ServiceProviderException {
 		Iterable<T> iterable = (Iterable<T>)this.injectables.get( interfaceClazz );
 		if ( iterable == null ) {
 			iterable = loadAllServicesImplementingTheInterface( interfaceClazz );
@@ -103,7 +105,7 @@ public class ServiceProvider {
 		return iterable;
 	}
 
-	public <T> Iterable<T> loadAllServicesImplementingTheInterface( Class<T> interfaceClazz )
+	public <T> Iterable<T> loadAllServicesImplementingTheInterface( final Class<T> interfaceClazz )
 			throws ServiceProviderException {
 		final CachedIterable<T> iterable = loadServiceProvidersFor( interfaceClazz );
 		provideFor( interfaceClazz, iterable );
@@ -112,29 +114,29 @@ public class ServiceProvider {
 	}
 
 	protected <T> CachedIterable<T> loadServiceProvidersFor(
-			Class<T> interfaceClazz ) throws ServiceProviderException {
-		Iterable<Class<T>> iterableInterfaces = loadClassesImplementing( interfaceClazz );
+			final Class<T> interfaceClazz ) throws ServiceProviderException {
+		final Iterable<Class<T>> iterableInterfaces = loadClassesImplementing( interfaceClazz );
 		return ServiceLoader.loadFrom( iterableInterfaces );
 	}
 
-	public <T> Class<T> loadClassImplementing( Class<T> interfaceClazz ) {
+	public <T> Class<T> loadClassImplementing( final Class<T> interfaceClazz ) {
 		return loadClassImplementing( interfaceClazz, new AnyClass<T>() );
 	}
 
-	public <T> Class<T> loadClassImplementing( Class<T> interfaceClazz, String named ) {
+	public <T> Class<T> loadClassImplementing( final Class<T> interfaceClazz, final String named ) {
 		return loadClassImplementing( interfaceClazz, new NamedClass<T>( named ) );
 	}
 
-	public <T> Class<T> loadClassImplementing( Class<T> interfaceClazz, Condition<Class<T>> condition ) {
+	public <T> Class<T> loadClassImplementing( final Class<T> interfaceClazz, final Condition<Class<T>> condition ) {
 		return loadClassesImplementing( interfaceClazz ).first( condition );
 	}
 
-	public <T> Iterable<Class<T>> loadClassesImplementing( Class<T> interfaceClazz, Condition<Class<T>> condition ) {
+	public <T> Iterable<Class<T>> loadClassesImplementing( final Class<T> interfaceClazz, final Condition<Class<T>> condition ) {
 		return loadClassesImplementing( interfaceClazz ).filter( condition );
 	}
 
 	@SuppressWarnings( { "rawtypes", "unchecked" } )
-	public <T> Iterable<Class<T>> loadClassesImplementing( Class<T> interfaceClazz ) {
+	public <T> Iterable<Class<T>> loadClassesImplementing( final Class<T> interfaceClazz ) {
 		Iterable<Class<T>> implementations = (Iterable)implementedClasses.get( interfaceClazz );
 		if ( implementations == null ) {
 			implementations = ServiceLoader.loadImplementationsFor( interfaceClazz );
@@ -143,24 +145,24 @@ public class ServiceProvider {
 		return implementations;
 	}
 
-	public <T> void provideFor( Class<T> interfaceClazz, ProviderFactory<T> provider ) {
+	public <T> void provideFor( final Class<T> interfaceClazz, final ProviderFactory<T> provider ) {
 		this.providers.memorizeProviderForClazz( provider, interfaceClazz );
 	}
 
-	public <T> void provideFor( Class<T> interfaceClazz, T object ) {
+	public <T> void provideFor( final Class<T> interfaceClazz, final T object ) {
 		provideFor( interfaceClazz, new SingleObjectIterable<T>( object ) );
 	}
 
-	protected <T> void provideFor( Class<T> interfaceClazz, Iterable<T> iterable ) {
+	protected <T> void provideFor( final Class<T> interfaceClazz, final Iterable<T> iterable ) {
 		this.injectables.put( interfaceClazz, iterable );
 	}
 
-	public <T> void provideOn( Iterable<T> iterable ) throws ServiceProviderException {
-		for ( T object : iterable )
+	public <T> void provideOn( final Iterable<T> iterable ) throws ServiceProviderException {
+		for ( final T object : iterable )
 			provideOn( object );
 	}
 
-	public void provideOn( Object object ) throws ServiceProviderException {
+	public void provideOn( final Object object ) throws ServiceProviderException {
 		try {
 			final ProvidableClass<?> providableClass = retrieveProvidableClass( object.getClass() );
 			providableClass.provide( object, this );
@@ -169,7 +171,7 @@ public class ServiceProvider {
 		}
 	}
 
-	private ProvidableClass<?> retrieveProvidableClass( Class<?> targetClazz ) {
+	private ProvidableClass<?> retrieveProvidableClass( final Class<?> targetClazz ) {
 		ProvidableClass<?> providableClass = providableClassCache.get( targetClazz );
 		if ( providableClass == null ) {
 			providableClass = ProvidableClass.wrap( targetClazz );
@@ -178,7 +180,7 @@ public class ServiceProvider {
 		return providableClass;
 	}
 
-	private <T> T produceFromFactory( Class<T> interfaceClazz, Condition<T> condition, ProviderContext context )
+	private <T> T produceFromFactory( final Class<T> interfaceClazz, final Condition<T> condition, final ProviderContext context )
 			throws ServiceProviderException {
 		final ProviderFactory<T> provider = getProviderFor( interfaceClazz, condition );
 		if ( provider != null )

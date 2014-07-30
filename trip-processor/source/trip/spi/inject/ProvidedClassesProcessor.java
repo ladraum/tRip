@@ -43,40 +43,37 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 
 	final DefaultMustacheFactory mustacheFactory = new DefaultMustacheFactory();
 	final Mustache factoryProviderClazzTemplate = this.mustacheFactory.compile( "META-INF/provided-class.mustache" );
-	final Set<String> producers = readAListWithAllCreatedClassesImplementing( ProviderFactory.class );
 	final Map<String, Set<String>> singletons = new HashMap<>();
 
 	@Override
-	public boolean process( Set<? extends TypeElement> annotations, RoundEnvironment roundEnv ) {
+	public boolean process( final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv ) {
 		try {
 			process( roundEnv );
-		} catch ( IOException e ) {
+		} catch ( final IOException e ) {
 			e.printStackTrace();
 		}
 		return true;
 	}
 
-	void process( RoundEnvironment roundEnv ) throws IOException {
+	void process( final RoundEnvironment roundEnv ) throws IOException {
 		memorizeServicesAnnotatedWith( roundEnv, Singleton.class );
 		memorizeServicesAnnotatedWith( roundEnv, Stateless.class );
 		processProducers( roundEnv, Stateless.class );
 		processProducers( roundEnv, Producer.class );
-		if ( !this.producers.isEmpty() )
-			createServiceProviderForProducers();
 		if ( !this.singletons.isEmpty() )
 			createSingletonMetaInf();
 		flush();
 	}
 
-	void memorizeServicesAnnotatedWith( RoundEnvironment roundEnv, Class<? extends Annotation> annotation ) {
-		Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith( annotation );
-		for ( Element element : annotatedElements )
+	void memorizeServicesAnnotatedWith( final RoundEnvironment roundEnv, final Class<? extends Annotation> annotation ) {
+		final Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith( annotation );
+		for ( final Element element : annotatedElements )
 			if ( element.getKind() == ElementKind.CLASS )
 				memorizeASingletonImplementation( ServiceImplementation.from( element ) );
 	}
 
-	void memorizeASingletonImplementation( ServiceImplementation from ) {
-		Set<String> list = this.singletons.get( from.interfaceClass() );// ,
+	void memorizeASingletonImplementation( final ServiceImplementation from ) {
+		Set<String> list = this.singletons.get( from.interfaceClass() );
 		if ( list == null ) {
 			list = readAListWithAllCreatedClassesImplementing( from.interfaceClass() );
 			this.singletons.put( from.interfaceClass(), list );
@@ -84,39 +81,34 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 		list.add( from.implementationClass() );
 	}
 
-	private HashSet<String> readAListWithAllCreatedClassesImplementing( Class<?> interfaceClass ) {
-		return readAListWithAllCreatedClassesImplementing( interfaceClass.getCanonicalName() );
-	}
-
-	private HashSet<String> readAListWithAllCreatedClassesImplementing( String interfaceClass ) {
+	private HashSet<String> readAListWithAllCreatedClassesImplementing( final String interfaceClass ) {
 		final LinkedHashSet<String> singletons = new LinkedHashSet<>();
-		for ( Class<?> implementationClass : ServiceLoader.loadImplementationsFor( interfaceClass ) )
+		for ( final Class<?> implementationClass : ServiceLoader.loadImplementationsFor( interfaceClass ) )
 			singletons.add( implementationClass.getCanonicalName() );
 		return singletons;
 	}
 
-	void processProducers( RoundEnvironment roundEnv, Class<? extends Annotation> annotation ) throws IOException {
-		Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith( annotation );
-		for ( Element element : annotatedElements )
+	void processProducers( final RoundEnvironment roundEnv, final Class<? extends Annotation> annotation ) throws IOException {
+		final Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith( annotation );
+		for ( final Element element : annotatedElements )
 			if ( element.getKind() == ElementKind.METHOD )
 				createAProducerFrom( ProducerImplementation.from( (ExecutableElement)element ) );
 			else if ( element.getKind() == ElementKind.CLASS )
 				createAProducerFrom( ProducerImplementation.from( (TypeElement)element ) );
 	}
 
-	void createAProducerFrom( ProducerImplementation clazz ) throws IOException {
-		String name = createClassCanonicalName( clazz );
+	void createAProducerFrom( final ProducerImplementation clazz ) throws IOException {
+		final String name = createClassCanonicalName( clazz );
 		if ( !classExists( clazz, name ) ) {
 			System.out.println( "Generating " + name );
-			JavaFileObject sourceFile = filer().createSourceFile( name );
-			Writer writer = sourceFile.openWriter();
+			final JavaFileObject sourceFile = filer().createSourceFile( name );
+			final Writer writer = sourceFile.openWriter();
 			this.factoryProviderClazzTemplate.execute( writer, clazz );
 			writer.close();
-			memorizeProvider( name );
 		}
 	}
 
-	boolean classExists( ProducerImplementation clazz, String name ) {
+	boolean classExists( final ProducerImplementation clazz, final String name ) {
 		try {
 			Class.forName( name );
 			return true;
@@ -125,47 +117,32 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 		}
 	}
 
-	String createClassCanonicalName( ProducerImplementation clazz ) {
+	String createClassCanonicalName( final ProducerImplementation clazz ) {
 		return String.format( "%s.%sAutoGeneratedProvider%s",
 				clazz.packageName(),
 				clazz.typeName(),
 				clazz.providerName() );
 	}
 
-	void memorizeProvider( String name ) {
-		this.producers.add( name );
-	}
-
-	void createServiceProviderForProducers() throws IOException {
-		Writer writer = createMetaInfForFactoryProviderInterface();
-		for ( String provider : this.producers )
-			writer.write( provider + EOL );
-		writer.close();
-	}
-
-	Writer createMetaInfForFactoryProviderInterface() throws IOException {
-		return createResource( PROVIDER_FILE );
-	}
-
 	void createSingletonMetaInf() throws IOException {
-		for ( String interfaceClass : this.singletons.keySet() ) {
+		for ( final String interfaceClass : this.singletons.keySet() ) {
 			System.out.println( "Registering service providers for " + interfaceClass );
-			Writer resource = createResource( SERVICES + interfaceClass );
-			for ( String implementation : this.singletons.get( interfaceClass ) )
+			final Writer resource = createResource( SERVICES + interfaceClass );
+			for ( final String implementation : this.singletons.get( interfaceClass ) )
 				resource.write( implementation + EOL );
 			resource.close();
 		}
 	}
 
-	Writer createResource( String resourcePath ) throws IOException {
-		FileObject resource = filer().getResource( StandardLocation.CLASS_OUTPUT, "", resourcePath );
-		URI uri = resource.toUri();
+	Writer createResource( final String resourcePath ) throws IOException {
+		final FileObject resource = filer().getResource( StandardLocation.CLASS_OUTPUT, "", resourcePath );
+		final URI uri = resource.toUri();
 		createNeededDirectoriesTo( uri );
-		File file = createFile( uri );
+		final File file = createFile( uri );
 		return new FileWriter( file );
 	}
 
-	void createNeededDirectoriesTo( URI uri ) {
+	void createNeededDirectoriesTo( final URI uri ) {
 		File dir = null;
 		if ( uri.isAbsolute() )
 			dir = new File( uri ).getParentFile();
@@ -174,8 +151,8 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 		dir.mkdirs();
 	}
 
-	File createFile( URI uri ) throws IOException {
-		File file = new File( uri );
+	File createFile( final URI uri ) throws IOException {
+		final File file = new File( uri );
 		if ( !file.exists() )
 			file.createNewFile();
 		return file;
@@ -186,7 +163,6 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 	}
 
 	void flush() {
-		this.producers.clear();
 		this.singletons.clear();
 	}
 

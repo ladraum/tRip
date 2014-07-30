@@ -1,6 +1,6 @@
 package trip.spi;
 
-@Name( "period" )
+@Singleton( name = "period" )
 public class ClosureProvider implements ProviderFactory<Closure> {
 
 	@Override

@@ -3,7 +3,7 @@ package trip.spi.helpers;
 import java.lang.reflect.Field;
 
 import lombok.Value;
-import trip.spi.Name;
+import trip.spi.Provided;
 import trip.spi.ProviderContext;
 import trip.spi.ServiceProvider;
 import trip.spi.ServiceProviderException;
@@ -19,18 +19,18 @@ public class ProvidableField<T> {
 	final Condition<T> condition;
 	final ProviderContext providerContext;
 
-	public void provide( Object instance, ServiceProvider provider )
+	public void provide( final Object instance, final ServiceProvider provider )
 			throws ServiceProviderException, IllegalArgumentException, IllegalAccessException {
-		Object value = provider.load( fieldType, condition, providerContext );
+		final Object value = provider.load( fieldType, condition, providerContext );
 		set( instance, value );
 	}
 
-	public void set( Object instance, Object value ) throws IllegalArgumentException, IllegalAccessException {
+	public void set( final Object instance, final Object value ) throws IllegalArgumentException, IllegalAccessException {
 		field.set( instance, value );
 	}
 
 	@SuppressWarnings( "unchecked" )
-	public static <T> ProvidableField<T> wrap( Field field ) {
+	public static <T> ProvidableField<T> wrap( final Field field ) {
 		field.setAccessible( true );
 		return new ProvidableField<T>(
 				field,
@@ -39,10 +39,10 @@ public class ProvidableField<T> {
 				new FieldProviderContext( field ) );
 	}
 
-	public static Condition<?> extractInjectionFilterCondition( Field field ) {
-		final Name annotation = field.getAnnotation( Name.class );
-		if ( annotation == null )
+	public static Condition<?> extractInjectionFilterCondition( final Field field ) {
+		final Provided annotation = field.getAnnotation( Provided.class );
+		if ( annotation.name().isEmpty() )
 			return new AnyObject<Object>();
-		return new NamedObject<Object>( annotation.value() );
+		return new NamedObject<Object>( annotation.name() );
 	}
 }

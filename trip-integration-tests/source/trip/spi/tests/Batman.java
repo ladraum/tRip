@@ -1,17 +1,14 @@
 package trip.spi.tests;
 
 import lombok.Delegate;
-import trip.spi.Name;
 import trip.spi.Provided;
 import trip.spi.Singleton;
 
-@Singleton( exposedAs = Hero.class )
-@Name( "batman" )
+@Singleton( exposedAs = Hero.class, name = "batman" )
 public class Batman implements Hero, World {
 
 	@Delegate
-	@Name( "ajax" )
-	@Provided
+	@Provided( name = "ajax" )
 	Hero ajax;
 
 	@Override
