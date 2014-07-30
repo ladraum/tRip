@@ -2,7 +2,7 @@ package blah.tests;
 
 import trip.spi.Singleton;
 
-@Singleton( Converter.class )
+@Singleton( exposedAs = Converter.class )
 public class LongConverter implements Converter<Long> {
 
 	@Override

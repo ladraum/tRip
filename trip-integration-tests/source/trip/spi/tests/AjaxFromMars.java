@@ -5,7 +5,7 @@ import trip.spi.Provided;
 import trip.spi.Singleton;
 
 @Name( "ajax" )
-@Singleton( Hero.class )
+@Singleton( exposedAs = Hero.class )
 public class AjaxFromMars implements Hero, World {
 
 	@Provided

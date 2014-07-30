@@ -3,7 +3,7 @@ package trip.spi.tests;
 import trip.spi.Producer;
 import trip.spi.Stateless;
 
-@Stateless
+@Stateless( exposedAs = ProducerOfShorts.class )
 public class StatelessProvidedProducerOfShorts implements ProducerOfShorts {
 
 	volatile short counter;

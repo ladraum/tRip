@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 @Target( { ElementType.TYPE } )
 public @interface Stateless {
 
-	Class<?> value() default Stateless.class;
+	Class<?> exposedAs() default Stateless.class;
 }

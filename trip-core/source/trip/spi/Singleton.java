@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 @Target( { ElementType.TYPE } )
 public @interface Singleton {
 
-	Class<?> value() default Singleton.class;
+	Class<?> exposedAs() default Singleton.class;
 }

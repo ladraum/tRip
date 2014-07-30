@@ -8,7 +8,7 @@ import trip.spi.Name;
 import trip.spi.Provided;
 import trip.spi.Singleton;
 
-@Singleton
+@Singleton( exposedAs = Converter.class )
 public class DateConverter implements Converter<Date> {
 
 	@Provided

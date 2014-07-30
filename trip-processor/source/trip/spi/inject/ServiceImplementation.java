@@ -2,8 +2,6 @@ package trip.spi.inject;
 
 import static trip.spi.inject.NameTransformations.stripGenericsFrom;
 
-import java.util.List;
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.MirroredTypeException;
@@ -18,18 +16,18 @@ public class ServiceImplementation {
 	final String implementationClass;
 
 	public ServiceImplementation(
-			String interfaceClass, String implementationClass ) {
+			final String interfaceClass, final String implementationClass ) {
 		this.interfaceClass = stripGenericsFrom( interfaceClass );
 		this.implementationClass = stripGenericsFrom( implementationClass );
 	}
 
-	public static ServiceImplementation from( Element element ) {
-		TypeElement type = (TypeElement)element;
-		String interfaceClass = getProvidedServiceClass( type );
+	public static ServiceImplementation from( final Element element ) {
+		final TypeElement type = (TypeElement)element;
+		final String interfaceClass = getProvidedServiceClass( type );
 		return new ServiceImplementation( interfaceClass, type.asType().toString() );
 	}
 
-	public static String getProvidedServiceClass( TypeElement type ) {
+	public static String getProvidedServiceClass( final TypeElement type ) {
 		if ( isAnnotatedForStateless( type ) )
 			return getProvidedServiceClassForStateless( type );
 		if ( isAnnotatedForSingleton( type ) )
@@ -37,63 +35,55 @@ public class ServiceImplementation {
 		return null;
 	}
 
-	private static boolean isAnnotatedForStateless( TypeElement type ) {
+	private static boolean isAnnotatedForStateless( final TypeElement type ) {
 		return type.getAnnotation( Stateless.class ) != null;
 	}
 
-	private static boolean isAnnotatedForSingleton( TypeElement type ) {
+	private static boolean isAnnotatedForSingleton( final TypeElement type ) {
 		return type.getAnnotation( Singleton.class ) != null;
 	}
 
-	private static String getProvidedServiceClassForStateless( TypeElement type ) {
-		TypeMirror statelessService = getProvidedStatelessAsTypeMirror( type );
-		List<? extends TypeMirror> interfaces = type.getInterfaces();
-		if ( isStatelessAnnotationClassBlank( statelessService ) ) {
-			if ( interfaces.isEmpty() )
-				return type.asType().toString();
-			return interfaces.get( 0 ).toString();
-		}
+	private static String getProvidedServiceClassForStateless( final TypeElement type ) {
+		final TypeMirror statelessService = getProvidedStatelessAsTypeMirror( type );
+		if ( isStatelessAnnotationClassBlank( statelessService ) )
+			return type.asType().toString();
 		return statelessService.toString();
 	}
 
-	private static TypeMirror getProvidedStatelessAsTypeMirror( TypeElement type ) {
+	private static TypeMirror getProvidedStatelessAsTypeMirror( final TypeElement type ) {
 		try {
-			Stateless singleton = type.getAnnotation( Stateless.class );
+			final Stateless singleton = type.getAnnotation( Stateless.class );
 			if ( singleton != null )
-				singleton.value();
+				singleton.exposedAs();
 			return null;
-		} catch ( MirroredTypeException cause ) {
+		} catch ( final MirroredTypeException cause ) {
 			return cause.getTypeMirror();
 		}
 	}
 
-	private static boolean isStatelessAnnotationClassBlank( TypeMirror providedClass ) {
+	private static boolean isStatelessAnnotationClassBlank( final TypeMirror providedClass ) {
 		return providedClass.toString().equals( Stateless.class.getCanonicalName() );
 	}
 
-	private static String getProvidedServiceClassForSingleton( TypeElement type ) {
-		TypeMirror providedClass = getProvidedSingletonAsTypeMirror( type );
-		List<? extends TypeMirror> interfaces = type.getInterfaces();
-		if ( isSingletonAnnotationBlank( providedClass ) ) {
-			if ( interfaces.isEmpty() )
+	private static String getProvidedServiceClassForSingleton( final TypeElement type ) {
+		final TypeMirror providedClass = getProvidedSingletonAsTypeMirror( type );
+		if ( isSingletonAnnotationBlank( providedClass ) )
 				return type.asType().toString();
-			return interfaces.get( 0 ).toString();
-		}
 		return providedClass.toString();
 	}
 
-	private static TypeMirror getProvidedSingletonAsTypeMirror( TypeElement type ) {
+	private static TypeMirror getProvidedSingletonAsTypeMirror( final TypeElement type ) {
 		try {
-			Singleton singleton = type.getAnnotation( Singleton.class );
+			final Singleton singleton = type.getAnnotation( Singleton.class );
 			if ( singleton != null )
-				singleton.value();
+				singleton.exposedAs();
 			return null;
-		} catch ( MirroredTypeException cause ) {
+		} catch ( final MirroredTypeException cause ) {
 			return cause.getTypeMirror();
 		}
 	}
 
-	private static boolean isSingletonAnnotationBlank( TypeMirror providedClass ) {
+	private static boolean isSingletonAnnotationBlank( final TypeMirror providedClass ) {
 		return providedClass.toString().equals( Singleton.class.getCanonicalName() );
 	}
 

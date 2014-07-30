@@ -2,7 +2,7 @@ package blah.tests;
 
 import trip.spi.Singleton;
 
-@Singleton( Converter.class )
+@Singleton( exposedAs = Converter.class )
 public class DoubleConverter implements Converter<Double> {
 
 	@Override

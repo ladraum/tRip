@@ -5,7 +5,7 @@ import trip.spi.Name;
 import trip.spi.Provided;
 import trip.spi.Singleton;
 
-@Singleton( Hero.class )
+@Singleton( exposedAs = Hero.class )
 @Name( "batman" )
 public class Batman implements Hero, World {
 
