@@ -1,0 +1,39 @@
+package {{packageName}};
+
+{{#serviceIdentificationName}}
+@trip.spi.Singleton( name="{{.}}", exposedAs={{{typeCanonicalName}}}.class )
+{{/serviceIdentificationName}}
+{{^serviceIdentificationName}}
+@trip.spi.Singleton( exposedAs={{typeCanonicalName}}.class )
+{{/serviceIdentificationName}}
+final public class {{typeName}}Stateless{{identifaction}}
+{{#exposedByClass}}
+	extends {{{typeCanonicalName}}} {
+{{/exposedByClass}}
+{{^exposedByClass}}
+	implements {{{typeCanonicalName}}} {
+{{/exposedByClass}}
+
+	@trip.spi.Provided trip.spi.ServiceProvider provider;
+	{{#exposedMethods}}
+
+	public {{returnType}} {{name}}( {{parametersWithTypesAsString}} ) {
+		try {
+			{{#returnable}}
+			return newInstance().{{name}}( {{parametersAsString}} );
+			{{/returnable}}
+			{{^returnable}}
+			newInstance().{{name}}( {{parametersAsString}} );
+			{{/returnable}}
+		} catch ( Throwable cause ) {
+			throw new RuntimeException( cause );
+		}
+	}
+	{{/exposedMethods}}
+
+	{{{typeCanonicalName}}} newInstance() throws trip.spi.ServiceProviderException {
+		{{{typeCanonicalName}}} instance = new {{{implementationCanonicalName}}}();
+		provider.provideOn( instance );
+		return instance;
+	}
+}

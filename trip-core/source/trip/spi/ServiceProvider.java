@@ -41,7 +41,7 @@ public class ServiceProvider {
 
 	protected ProviderFactoryMap loadAllProviders() {
 		try {
-			return ProviderFactoryMap.from( loadSingletons( ProviderFactory.class ) );
+			return ProviderFactoryMap.from( loadAll( ProviderFactory.class ) );
 		} catch ( final ServiceProviderException e ) {
 			throw new IllegalStateException( e );
 		}
@@ -77,7 +77,7 @@ public class ServiceProvider {
 		final T produced = produceFromFactory( interfaceClazz, condition, context );
 		if ( produced != null )
 			return produced;
-		return loadSingletons( interfaceClazz, condition ).first( condition );
+		return loadAll( interfaceClazz, condition ).first( condition );
 	}
 
 	@SuppressWarnings( "unchecked" )
@@ -88,16 +88,16 @@ public class ServiceProvider {
 		return (ProviderFactory<T>)this.providers.get( interfaceClazz, condition );
 	}
 
-	public <T> Iterable<T> loadSingletons( final Class<T> interfaceClazz, final String name ) throws ServiceProviderException {
-		return loadSingletons( interfaceClazz, new NamedObject<T>( name ) );
+	public <T> Iterable<T> loadAll( final Class<T> interfaceClazz, final String name ) throws ServiceProviderException {
+		return loadAll( interfaceClazz, new NamedObject<T>( name ) );
 	}
 
-	public <T> Iterable<T> loadSingletons( final Class<T> interfaceClazz, final Condition<T> condition ) throws ServiceProviderException {
-		return loadSingletons( interfaceClazz ).filter( condition );
+	public <T> Iterable<T> loadAll( final Class<T> interfaceClazz, final Condition<T> condition ) throws ServiceProviderException {
+		return loadAll( interfaceClazz ).filter( condition );
 	}
 
 	@SuppressWarnings( "unchecked" )
-	public <T> Iterable<T> loadSingletons( final Class<T> interfaceClazz ) throws ServiceProviderException {
+	public <T> Iterable<T> loadAll( final Class<T> interfaceClazz ) throws ServiceProviderException {
 		Iterable<T> iterable = (Iterable<T>)this.injectables.get( interfaceClazz );
 		if ( iterable == null ) {
 			iterable = loadAllServicesImplementingTheInterface( interfaceClazz );

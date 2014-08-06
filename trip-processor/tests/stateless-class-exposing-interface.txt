@@ -1,0 +1,30 @@
+package sample.project;
+
+@trip.spi.Singleton( exposedAs=important.api.Interface.class )
+final public class InterfaceStateless1612123513
+	implements important.api.Interface {
+
+	@trip.spi.Provided trip.spi.ServiceProvider provider;
+
+	public void voidMethod(  ) {
+		try {
+			newInstance().voidMethod(  );
+		} catch ( Throwable cause ) {
+			throw new RuntimeException( cause );
+		}
+	}
+
+	public Long sum( Double arg0,Integer arg1 ) {
+		try {
+			return newInstance().sum( arg0,arg1 );
+		} catch ( Throwable cause ) {
+			throw new RuntimeException( cause );
+		}
+	}
+
+	important.api.Interface newInstance() throws trip.spi.ServiceProviderException {
+		important.api.Interface instance = new sample.project.ServiceFromInterface();
+		provider.provideOn( instance );
+		return instance;
+	}
+}

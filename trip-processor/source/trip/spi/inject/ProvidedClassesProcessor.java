@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.lang.annotation.Annotation;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,6 +29,8 @@ import trip.spi.ProviderFactory;
 import trip.spi.Singleton;
 import trip.spi.Stateless;
 import trip.spi.helpers.cache.ServiceLoader;
+import trip.spi.inject.stateless.StatelessClass;
+import trip.spi.inject.stateless.StatelessClassGenerator;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
@@ -44,6 +45,7 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 	final DefaultMustacheFactory mustacheFactory = new DefaultMustacheFactory();
 	final Mustache factoryProviderClazzTemplate = this.mustacheFactory.compile( "META-INF/provided-class.mustache" );
 	final Map<String, Set<String>> singletons = new HashMap<>();
+	final StatelessClassGenerator statelessClassGenerator = new StatelessClassGenerator();
 
 	@Override
 	public boolean process( final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv ) {
@@ -56,29 +58,59 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 	}
 
 	void process( final RoundEnvironment roundEnv ) throws IOException {
-		memorizeServicesAnnotatedWith( roundEnv, Singleton.class );
-		memorizeServicesAnnotatedWith( roundEnv, Stateless.class );
-		processProducers( roundEnv, Stateless.class );
-		processProducers( roundEnv, Producer.class );
+		processSingletons( roundEnv );
+		processStateless( roundEnv );
+		processProducers( roundEnv );
 		if ( !this.singletons.isEmpty() )
 			createSingletonMetaInf();
 		flush();
 	}
 
-	void memorizeServicesAnnotatedWith( final RoundEnvironment roundEnv, final Class<? extends Annotation> annotation ) {
-		final Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith( annotation );
+	private void processStateless( RoundEnvironment roundEnv ) throws IOException {
+		final Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith( Stateless.class );
 		for ( final Element element : annotatedElements )
 			if ( element.getKind() == ElementKind.CLASS )
-				memorizeASingletonImplementation( ServiceImplementation.from( element ) );
+				memorizeAServiceImplementation( StatelessClass.from( (TypeElement)element ) );
 	}
 
-	void memorizeASingletonImplementation( final ServiceImplementation from ) {
-		Set<String> list = this.singletons.get( from.interfaceClass() );
-		if ( list == null ) {
-			list = readAListWithAllCreatedClassesImplementing( from.interfaceClass() );
-			this.singletons.put( from.interfaceClass(), list );
+	void processSingletons( final RoundEnvironment roundEnv ) {
+		final Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith( Singleton.class );
+		for ( final Element element : annotatedElements )
+			if ( element.getKind() == ElementKind.CLASS )
+				memorizeAServiceImplementation( SingletonImplementation.from( element ) );
+	}
+
+	void memorizeAServiceImplementation( final SingletonImplementation from ) {
+		String interfaceClass = from.interfaceClass();
+		String implementationClass = from.implementationClass();
+		memorizeAServiceImplementation( interfaceClass, implementationClass );
+	}
+
+	void memorizeAServiceImplementation( StatelessClass clazz ) throws IOException {
+		createAStatelessClassFrom( clazz );
+		String interfaceClass = clazz.getTypeCanonicalName();
+		String implementationClass = clazz.getImplementationCanonicalName();
+		memorizeAServiceImplementation( interfaceClass, implementationClass );
+	}
+
+	void createAStatelessClassFrom( final StatelessClass clazz ) throws IOException {
+		final String name = clazz.getGeneratedClassCanonicalName();
+		if ( !classExists( name ) ) {
+			System.out.println( "Generating " + name );
+			final JavaFileObject sourceFile = filer().createSourceFile( name );
+			final Writer writer = sourceFile.openWriter();
+			this.statelessClassGenerator.write( clazz, writer );
+			writer.close();
 		}
-		list.add( from.implementationClass() );
+	}
+
+	void memorizeAServiceImplementation( String interfaceClass, String implementationClass ) {
+		Set<String> list = this.singletons.get( interfaceClass );
+		if ( list == null ) {
+			list = readAListWithAllCreatedClassesImplementing( interfaceClass );
+			this.singletons.put( interfaceClass, list );
+		}
+		list.add( implementationClass );
 	}
 
 	private HashSet<String> readAListWithAllCreatedClassesImplementing( final String interfaceClass ) {
@@ -88,18 +120,16 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 		return singletons;
 	}
 
-	void processProducers( final RoundEnvironment roundEnv, final Class<? extends Annotation> annotation ) throws IOException {
-		final Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith( annotation );
+	void processProducers( final RoundEnvironment roundEnv ) throws IOException {
+		final Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith( Producer.class );
 		for ( final Element element : annotatedElements )
 			if ( element.getKind() == ElementKind.METHOD )
 				createAProducerFrom( ProducerImplementation.from( (ExecutableElement)element ) );
-			else if ( element.getKind() == ElementKind.CLASS )
-				createAProducerFrom( ProducerImplementation.from( (TypeElement)element ) );
 	}
 
-	void createAProducerFrom( final ProducerImplementation clazz ) throws IOException {
-		final String name = createClassCanonicalName( clazz );
-		if ( !classExists( clazz, name ) ) {
+	void createAProducerFrom( final GenerableClass clazz ) throws IOException {
+		final String name = clazz.getGeneratedClassCanonicalName();
+		if ( !classExists( name ) ) {
 			System.out.println( "Generating " + name );
 			final JavaFileObject sourceFile = filer().createSourceFile( name );
 			final Writer writer = sourceFile.openWriter();
@@ -108,7 +138,7 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 		}
 	}
 
-	boolean classExists( final ProducerImplementation clazz, final String name ) {
+	boolean classExists( final String name ) {
 		try {
 			Class.forName( name );
 			return true;

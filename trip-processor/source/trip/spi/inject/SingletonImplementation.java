@@ -10,28 +10,43 @@ import javax.lang.model.type.TypeMirror;
 import trip.spi.Singleton;
 import trip.spi.Stateless;
 
-public class ServiceImplementation {
+public class SingletonImplementation {
 
 	final String interfaceClass;
 	final String implementationClass;
 
-	public ServiceImplementation(
+	public SingletonImplementation(
 			final String interfaceClass, final String implementationClass ) {
 		this.interfaceClass = stripGenericsFrom( interfaceClass );
 		this.implementationClass = stripGenericsFrom( implementationClass );
 	}
 
-	public static ServiceImplementation from( final Element element ) {
+	public static SingletonImplementation from( final Element element ) {
 		final TypeElement type = (TypeElement)element;
-		final String interfaceClass = getProvidedServiceClass( type );
-		return new ServiceImplementation( interfaceClass, type.asType().toString() );
+		final String interfaceClass = getProvidedServiceClassAsString( type );
+		return new SingletonImplementation( interfaceClass, type.asType().toString() );
 	}
 
-	public static String getProvidedServiceClass( final TypeElement type ) {
+	public static String getProvidedServiceClassAsString( final TypeElement type ) {
+		TypeMirror typeMirror = getProvidedServiceClass( type );
+		if ( typeMirror == null )
+			return null;
+		return typeMirror.toString();
+	}
+
+	public static TypeMirror getProvidedServiceClass( final TypeElement type ) {
 		if ( isAnnotatedForStateless( type ) )
 			return getProvidedServiceClassForStateless( type );
 		if ( isAnnotatedForSingleton( type ) )
 			return getProvidedServiceClassForSingleton( type );
+		return null;
+	}
+
+	public static String getProvidedServiceName( final TypeElement type ) {
+		if ( isAnnotatedForStateless( type ) )
+			return type.getAnnotation( Stateless.class ).name();
+		if ( isAnnotatedForSingleton( type ) )
+			return type.getAnnotation( Singleton.class ).name();
 		return null;
 	}
 
@@ -43,11 +58,11 @@ public class ServiceImplementation {
 		return type.getAnnotation( Singleton.class ) != null;
 	}
 
-	private static String getProvidedServiceClassForStateless( final TypeElement type ) {
+	private static TypeMirror getProvidedServiceClassForStateless( final TypeElement type ) {
 		final TypeMirror statelessService = getProvidedStatelessAsTypeMirror( type );
 		if ( isStatelessAnnotationClassBlank( statelessService ) )
-			return type.asType().toString();
-		return statelessService.toString();
+			return type.asType();
+		return statelessService;
 	}
 
 	private static TypeMirror getProvidedStatelessAsTypeMirror( final TypeElement type ) {
@@ -65,11 +80,11 @@ public class ServiceImplementation {
 		return providedClass.toString().equals( Stateless.class.getCanonicalName() );
 	}
 
-	private static String getProvidedServiceClassForSingleton( final TypeElement type ) {
+	private static TypeMirror getProvidedServiceClassForSingleton( final TypeElement type ) {
 		final TypeMirror providedClass = getProvidedSingletonAsTypeMirror( type );
 		if ( isSingletonAnnotationBlank( providedClass ) )
-				return type.asType().toString();
-		return providedClass.toString();
+			return type.asType();
+		return providedClass;
 	}
 
 	private static TypeMirror getProvidedSingletonAsTypeMirror( final TypeElement type ) {
