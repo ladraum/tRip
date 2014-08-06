@@ -92,11 +92,17 @@ Configuring a maven project is easy. Just include the following repository and d
 		<id>skullabs-release-repository</id>
 		<name>Texo Release Repository</name>
 		<url>http://skullabs.io:8081/content/repositories/PublicRelease/</url>
+		<releases><enabled>true</enabled></releases>
+		<snapshots><enabled>false</enabled></snapshots>
 	</repository>
+...
+	<properties>
+		<version.trip>1.0.0</version.trip>
+	</properties>
 ...
 	<dependency>
 		<groupId>io.skullabs.trip</groupId>
-		<version>1.0-SNAPSHOT</version>
+		<version>${version.trip}</version>
 		<artifactId>trip-core</artifactId>
 	</dependency>
 	<!-- Only needed in compilation time. It scans your
@@ -105,7 +111,7 @@ Configuring a maven project is easy. Just include the following repository and d
 		making your warm-up faster. -->
 	<dependency>
 		<groupId>io.skullabs.trip</groupId>
-		<version>1.0-SNAPSHOT</version>
+		<version>${version.trip}</version>
 		<artifactId>trip-processor</artifactId>
 		<scope>provided</scope>
 	</dependency>
