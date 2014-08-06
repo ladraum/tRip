@@ -17,7 +17,7 @@ final public class {{typeName}}Stateless{{identifaction}}
 	@trip.spi.Provided trip.spi.ServiceProvider provider;
 	{{#exposedMethods}}
 
-	public {{returnType}} {{name}}( {{parametersWithTypesAsString}} ) {
+	public {{{returnType}}} {{name}}( {{parametersWithTypesAsString}} ) {
 		try {
 			{{#returnable}}
 			return newInstance().{{name}}( {{parametersAsString}} );
