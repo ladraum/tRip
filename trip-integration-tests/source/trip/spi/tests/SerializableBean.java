@@ -1,8 +1,8 @@
 package trip.spi.tests;
 
-import trip.spi.Singleton;
+import trip.spi.Stateless;
 
-@Singleton( exposedAs = Bean.class )
+@Stateless( exposedAs = Bean.class )
 public class SerializableBean implements Bean {
 
 }

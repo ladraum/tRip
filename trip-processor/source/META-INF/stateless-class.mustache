@@ -11,7 +11,7 @@ final public class {{typeName}}Stateless{{identifaction}}
 	extends {{{typeCanonicalName}}} {
 {{/exposedByClass}}
 {{^exposedByClass}}
-	implements {{{typeCanonicalName}}} {
+	extends {{{implementationCanonicalName}}} implements {{{typeCanonicalName}}} {
 {{/exposedByClass}}
 
 	@trip.spi.Provided trip.spi.ServiceProvider provider;

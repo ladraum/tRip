@@ -2,7 +2,7 @@ package sample.project;
 
 @trip.spi.Singleton( exposedAs=important.api.Interface.class )
 final public class InterfaceStateless1612123513
-	implements important.api.Interface {
+	extends sample.project.ServiceFromInterface implements important.api.Interface {
 
 	@trip.spi.Provided trip.spi.ServiceProvider provider;
 
