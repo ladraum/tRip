@@ -8,7 +8,7 @@ import trip.spi.ProviderContext;
 import trip.spi.ServiceProvider;
 import trip.spi.ServiceProviderException;
 import trip.spi.helpers.filter.ChainedCondition;
-import trip.spi.helpers.filter.ClassAssignableFrom;
+import trip.spi.helpers.filter.IsAssignableFrom;
 import trip.spi.helpers.filter.Condition;
 import trip.spi.helpers.filter.NamedObject;
 
@@ -43,8 +43,8 @@ public class ProvidableField<T> {
 	}
 
 	public static Condition<?> extractInjectionFilterCondition( final Field field ) {
-		final ChainedCondition conditions = new ChainedCondition();
-		conditions.add( new ClassAssignableFrom( field.getType() ) );
+		final ChainedCondition<Object> conditions = new ChainedCondition<Object>();
+		conditions.add( new IsAssignableFrom( field.getType() ) );
 
 		final Provided annotation = field.getAnnotation( Provided.class );
 		if ( !annotation.name().isEmpty() )

@@ -8,8 +8,8 @@ import lombok.val;
 import lombok.experimental.ExtensionMethod;
 import trip.spi.helpers.EmptyProviderContext;
 import trip.spi.helpers.KeyValueProviderContext;
+import trip.spi.helpers.ProducerFactoryMap;
 import trip.spi.helpers.ProvidableClass;
-import trip.spi.helpers.ProviderFactoryMap;
 import trip.spi.helpers.SingleObjectIterable;
 import trip.spi.helpers.cache.CachedIterable;
 import trip.spi.helpers.cache.ServiceLoader;
@@ -25,23 +25,23 @@ public class ServiceProvider {
 
 	final Map<Class<?>, ProvidableClass<?>> providableClassCache = new HashMap<Class<?>, ProvidableClass<?>>();
 	final Map<Class<?>, Iterable<Class<?>>> implementedClasses = new HashMap<Class<?>, Iterable<Class<?>>>();
-	final Map<Class<?>, Iterable<?>> injectables;
-	final ProviderFactoryMap providers;
+	final Map<Class<?>, Iterable<?>> providers;
+	final ProducerFactoryMap producers;
 
 	public ServiceProvider() {
-		this.injectables = createDefaultInjectables();
-		this.providers = loadAllProviders();
+		this.providers = createDefaultProvidedData();
+		this.producers = loadAllProducers();
 	}
 
-	protected HashMap<Class<?>, Iterable<?>> createDefaultInjectables() {
+	protected HashMap<Class<?>, Iterable<?>> createDefaultProvidedData() {
 		val injectables = new HashMap<Class<?>, Iterable<?>>();
 		injectables.put( getClass(), new SingleObjectIterable<ServiceProvider>( this ) );
 		return injectables;
 	}
 
-	protected ProviderFactoryMap loadAllProviders() {
+	protected ProducerFactoryMap loadAllProducers() {
 		try {
-			return ProviderFactoryMap.from( loadAll( ProviderFactory.class ) );
+			return ProducerFactoryMap.from( loadAll( ProducerFactory.class ) );
 		} catch ( final ServiceProviderException e ) {
 			throw new IllegalStateException( e );
 		}
@@ -81,11 +81,11 @@ public class ServiceProvider {
 	}
 
 	@SuppressWarnings( "unchecked" )
-	private <T> ProviderFactory<T> getProviderFor( final Class<T> interfaceClazz,
+	private <T> ProducerFactory<T> getProviderFor( final Class<T> interfaceClazz,
 			final Condition<T> condition ) {
-		if ( this.providers == null )
+		if ( this.producers == null )
 			return null;
-		return (ProviderFactory<T>)this.providers.get( interfaceClazz, condition );
+		return (ProducerFactory<T>)this.producers.get( interfaceClazz, condition );
 	}
 
 	public <T> Iterable<T> loadAll( final Class<T> interfaceClazz, final String name ) throws ServiceProviderException {
@@ -98,7 +98,7 @@ public class ServiceProvider {
 
 	@SuppressWarnings( "unchecked" )
 	public <T> Iterable<T> loadAll( final Class<T> interfaceClazz ) throws ServiceProviderException {
-		Iterable<T> iterable = (Iterable<T>)this.injectables.get( interfaceClazz );
+		Iterable<T> iterable = (Iterable<T>)this.providers.get( interfaceClazz );
 		if ( iterable == null ) {
 			iterable = loadAllServicesImplementingTheInterface( interfaceClazz );
 		}
@@ -108,7 +108,7 @@ public class ServiceProvider {
 	public <T> Iterable<T> loadAllServicesImplementingTheInterface( final Class<T> interfaceClazz )
 			throws ServiceProviderException {
 		final CachedIterable<T> iterable = loadServiceProvidersFor( interfaceClazz );
-		provideFor( interfaceClazz, iterable );
+		providerFor( interfaceClazz, iterable );
 		provideOn( iterable );
 		return iterable;
 	}
@@ -145,16 +145,16 @@ public class ServiceProvider {
 		return implementations;
 	}
 
-	public <T> void provideFor( final Class<T> interfaceClazz, final ProviderFactory<T> provider ) {
-		this.providers.memorizeProviderForClazz( provider, interfaceClazz );
+	public <T> void providerFor( final Class<T> interfaceClazz, final ProducerFactory<T> provider ) {
+		this.producers.memorizeProviderForClazz( provider, interfaceClazz );
 	}
 
-	public <T> void provideFor( final Class<T> interfaceClazz, final T object ) {
-		provideFor( interfaceClazz, new SingleObjectIterable<T>( object ) );
+	public <T> void providerFor( final Class<T> interfaceClazz, final T object ) {
+		providerFor( interfaceClazz, new SingleObjectIterable<T>( object ) );
 	}
 
-	protected <T> void provideFor( final Class<T> interfaceClazz, final Iterable<T> iterable ) {
-		this.injectables.put( interfaceClazz, iterable );
+	protected <T> void providerFor( final Class<T> interfaceClazz, final Iterable<T> iterable ) {
+		this.providers.put( interfaceClazz, iterable );
 	}
 
 	public <T> void provideOn( final Iterable<T> iterable ) throws ServiceProviderException {
@@ -182,7 +182,7 @@ public class ServiceProvider {
 
 	private <T> T produceFromFactory( final Class<T> interfaceClazz, final Condition<T> condition, final ProviderContext context )
 			throws ServiceProviderException {
-		final ProviderFactory<T> provider = getProviderFor( interfaceClazz, condition );
+		final ProducerFactory<T> provider = getProviderFor( interfaceClazz, condition );
 		if ( provider != null )
 			return provider.provide( context );
 		return null;
