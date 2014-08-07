@@ -1,7 +1,7 @@
 package trip.spi;
 
 @Singleton( name = "period" )
-public class ClosureProvider implements ProviderFactory<Closure> {
+public class ClosureProvider implements ProducerFactory<Closure> {
 
 	@Override
 	public Closure provide( ProviderContext context ) {

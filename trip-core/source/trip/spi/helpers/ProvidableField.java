@@ -7,7 +7,8 @@ import trip.spi.Provided;
 import trip.spi.ProviderContext;
 import trip.spi.ServiceProvider;
 import trip.spi.ServiceProviderException;
-import trip.spi.helpers.filter.AnyObject;
+import trip.spi.helpers.filter.ChainedCondition;
+import trip.spi.helpers.filter.ClassAssignableFrom;
 import trip.spi.helpers.filter.Condition;
 import trip.spi.helpers.filter.NamedObject;
 
@@ -29,20 +30,26 @@ public class ProvidableField<T> {
 		field.set( instance, value );
 	}
 
-	@SuppressWarnings( "unchecked" )
+	@SuppressWarnings( { "unchecked", "rawtypes" } )
 	public static <T> ProvidableField<T> wrap( final Field field ) {
 		field.setAccessible( true );
+		Provided provided = field.getAnnotation( Provided.class );
+		Class expectedClass = provided.exposedAs().equals( Provided.class )
+			? field.getType() : provided.exposedAs();
 		return new ProvidableField<T>(
-				field,
-				(Class<T>)field.getType(),
+			field, (Class<T>)expectedClass,
 				(Condition<T>)extractInjectionFilterCondition( field ),
 				new FieldProviderContext( field ) );
 	}
 
 	public static Condition<?> extractInjectionFilterCondition( final Field field ) {
+		final ChainedCondition conditions = new ChainedCondition();
+		conditions.add( new ClassAssignableFrom( field.getType() ) );
+
 		final Provided annotation = field.getAnnotation( Provided.class );
-		if ( annotation.name().isEmpty() )
-			return new AnyObject<Object>();
-		return new NamedObject<Object>( annotation.name() );
+		if ( !annotation.name().isEmpty() )
+			conditions.add( new NamedObject<>( annotation.name() ) );
+
+		return conditions;
 	}
 }

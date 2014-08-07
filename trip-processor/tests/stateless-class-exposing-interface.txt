@@ -22,8 +22,8 @@ final public class InterfaceStateless1612123513
 		}
 	}
 
-	important.api.Interface newInstance() throws trip.spi.ServiceProviderException {
-		important.api.Interface instance = new sample.project.ServiceFromInterface();
+	sample.project.ServiceFromInterface newInstance() throws trip.spi.ServiceProviderException {
+		sample.project.ServiceFromInterface instance = new sample.project.ServiceFromInterface();
 		provider.provideOn( instance );
 		return instance;
 	}

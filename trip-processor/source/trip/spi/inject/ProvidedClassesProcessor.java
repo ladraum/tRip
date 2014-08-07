@@ -25,7 +25,7 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
 
 import trip.spi.Producer;
-import trip.spi.ProviderFactory;
+import trip.spi.ProducerFactory;
 import trip.spi.Singleton;
 import trip.spi.Stateless;
 import trip.spi.helpers.cache.ServiceLoader;
@@ -40,7 +40,7 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 
 	static final String EOL = "\n";
 	static final String SERVICES = "META-INF/services/";
-	static final String PROVIDER_FILE = SERVICES + ProviderFactory.class.getCanonicalName();
+	static final String PROVIDER_FILE = SERVICES + ProducerFactory.class.getCanonicalName();
 
 	final DefaultMustacheFactory mustacheFactory = new DefaultMustacheFactory();
 	final Mustache factoryProviderClazzTemplate = this.mustacheFactory.compile( "META-INF/provided-class.mustache" );

@@ -1,6 +1,6 @@
 package trip.spi;
 
-public interface ProviderFactory<T> {
+public interface ProducerFactory<T> {
 
 	T provide( ProviderContext context ) throws ServiceProviderException;
 

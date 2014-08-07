@@ -9,36 +9,36 @@ import java.util.Map;
 
 import lombok.Delegate;
 import lombok.experimental.ExtensionMethod;
-import trip.spi.ProviderFactory;
+import trip.spi.ProducerFactory;
 import trip.spi.helpers.filter.Condition;
 import trip.spi.helpers.filter.Filter;
 
 @ExtensionMethod( Filter.class )
-public class ProviderFactoryMap implements Map<Class<?>, List<ProviderFactory<?>>> {
+public class ProducerFactoryMap implements Map<Class<?>, List<ProducerFactory<?>>> {
 
 	@Delegate
-	final Map<Class<?>, List<ProviderFactory<?>>> map = new HashMap<>();
+	final Map<Class<?>, List<ProducerFactory<?>>> map = new HashMap<>();
 
 	@SuppressWarnings("rawtypes")
-	public static ProviderFactoryMap from( Iterable<ProviderFactory> iterable ) {
-		ProviderFactoryMap providers = new ProviderFactoryMap();
-		for ( ProviderFactory<?> provider : iterable ) {
+	public static ProducerFactoryMap from( Iterable<ProducerFactory> iterable ) {
+		ProducerFactoryMap providers = new ProducerFactoryMap();
+		for ( ProducerFactory<?> provider : iterable ) {
 			Class<?> clazz = getGenericClassFrom( provider );
 			providers.memorizeProviderForClazz(provider, clazz);
 		}
 		return providers;
 	}
 
-	private static Class<?> getGenericClassFrom( ProviderFactory<?> provider ) {
+	private static Class<?> getGenericClassFrom( ProducerFactory<?> provider ) {
 		Type[] types = provider.getClass().getGenericInterfaces();
 		for ( Type type : types )
-			if ( ( (ParameterizedType)type ).getRawType().equals( ProviderFactory.class ) )
+			if ( ( (ParameterizedType)type ).getRawType().equals( ProducerFactory.class ) )
 				return (Class<?>)( (ParameterizedType)type ).getActualTypeArguments()[0];
 		return null;
 	}
 
-	public void memorizeProviderForClazz( ProviderFactory<?> provider, Class<?> clazz ) {
-		List<ProviderFactory<?>> iterable = map.get( clazz );
+	public void memorizeProviderForClazz( ProducerFactory<?> provider, Class<?> clazz ) {
+		List<ProducerFactory<?>> iterable = map.get( clazz );
 		if ( iterable == null ) {
 			iterable = new ArrayList<>();
 			map.put( clazz, iterable );
@@ -46,10 +46,10 @@ public class ProviderFactoryMap implements Map<Class<?>, List<ProviderFactory<?>
 		iterable.add( provider );
 	}
 
-	public ProviderFactory<?> get( Class<?> clazz, Condition<?> condition ) {
-		List<ProviderFactory<?>> list = get( clazz );
+	public ProducerFactory<?> get( Class<?> clazz, Condition<?> condition ) {
+		List<ProducerFactory<?>> list = get( clazz );
 		if ( list == null )
 			return null;
-		return (ProviderFactory<?>)list.first(condition);
+		return (ProducerFactory<?>)list.first(condition);
 	}
 }

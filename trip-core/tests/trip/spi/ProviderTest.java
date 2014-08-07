@@ -15,7 +15,7 @@ public class ProviderTest {
 	
 	@Before
 	public void grantThatProvidedHasNoCachedData() {
-		Iterable<?> nullIterable = this.provider.injectables.get( Printable.class );
+		Iterable<?> nullIterable = this.provider.providers.get( Printable.class );
 		assertNull(nullIterable);
 		nullIterable = this.provider.implementedClasses.get( Printable.class );
 		assertNull(nullIterable);
@@ -29,9 +29,9 @@ public class ProviderTest {
 		grantThatRetrieveAWellImplementedPrintableInstanceAsExpected();
 		assertEquals( implementations , this.provider.implementedClasses.get( Printable.class ));
 
-		Iterable<?> printableInjectables = this.provider.injectables.get( Printable.class );
+		Iterable<?> printableInjectables = this.provider.providers.get( Printable.class );
 		grantThatRetrieveAWellImplementedPrintableInstanceAsExpected();
-		assertEquals( printableInjectables, this.provider.injectables.get( Printable.class ));
+		assertEquals( printableInjectables, this.provider.providers.get( Printable.class ) );
 	}
 
 	private void grantThatRetrieveAllClassesThatImplementsAnInterface() {
