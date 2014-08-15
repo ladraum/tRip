@@ -13,33 +13,36 @@ import java.util.ServiceConfigurationError;
 
 import lombok.Cleanup;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-   
-@RequiredArgsConstructor
+
+@Getter
 public class LazyClassReader<S> implements Iterator<Class<S>> {
 
-    private static final String PREFIX = "META-INF/services/";
-    private static final int NOT_FOUND = -1;
-	
-    @Getter
-    final List<Class<S>> cache = new ArrayList<Class<S>>();
+	private static final String PREFIX = "META-INF/services/";
+	private static final int NOT_FOUND = -1;
 
-    @Getter( lazy=true )
-	private final Enumeration<URL> resources = readAllServiceResources();
-
+	final List<Class<S>> cache = new ArrayList<Class<S>>();
 	final String serviceClassCanonicalName;
-    final ClassLoader loader;
+	final ClassLoader loader;
+	final Enumeration<URL> resources;
 	Iterator<String> currentResourceLines;
 
 	public LazyClassReader( Class<S> serviceClass, ClassLoader loader ) {
 		this( serviceClass.getCanonicalName(), loader );
 	}
 
+	public LazyClassReader(
+		final String serviceClassCanonicalName,
+		final ClassLoader loader ) {
+		this.serviceClassCanonicalName = serviceClassCanonicalName;
+		this.loader = loader;
+		this.resources = readAllServiceResources();
+	}
+
 	Enumeration<URL> readAllServiceResources() {
 		try {
 			String fullName = PREFIX + serviceClassCanonicalName;
-			return loader.getResources(fullName);
-		} catch (IOException cause) {
+			return loader.getResources( fullName );
+		} catch ( IOException cause ) {
 			throw new ServiceConfigurationError( serviceClassCanonicalName + ": " + cause.getMessage(), cause );
 		}
 	}
@@ -51,52 +54,55 @@ public class LazyClassReader<S> implements Iterator<Class<S>> {
 				readNextResourceFile();
 			return currentResourceLines != null && currentResourceLines.hasNext();
 		} catch ( IOException cause ) {
-			throw new IllegalStateException(cause);
+			throw new IllegalStateException( cause );
 		}
 	}
 
-	void readNextResourceFile() throws IOException{
+	void readNextResourceFile() throws IOException {
 		if ( getResources().hasMoreElements() ) {
 			URL nextElement = getResources().nextElement();
-			currentResourceLines = readLines(nextElement);
+			currentResourceLines = readLines( nextElement );
 		}
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings( "unchecked" )
 	public Class<S> next() {
 		try {
 			String classCanonicalName = currentResourceLines.next();
-			Class<S> clazz = (Class<S>) Class.forName(classCanonicalName, false, loader);
-			cache.add(clazz);
+			Class<S> clazz = (Class<S>)Class.forName( classCanonicalName, false, loader );
+			cache.add( clazz );
 			return clazz;
-		} catch (ClassNotFoundException cause) {
+		} catch ( ClassNotFoundException cause ) {
 			throw new IllegalStateException( cause );
 		}
 	}
 
 	@Override
-	public void remove() {}
+	public void remove() {
+	}
 
 	Iterator<String> readLines( URL url ) throws IOException {
-		@Cleanup InputStream inputStream = url.openStream();
-		@Cleanup BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "utf-8"));
+		@Cleanup
+		InputStream inputStream = url.openStream();
+		@Cleanup
+		BufferedReader reader = new BufferedReader( new InputStreamReader( inputStream, "utf-8" ) );
 		List<String> lines = new ArrayList<String>();
 		String line = null;
-		while ( (line = readNextLine(reader)) != null )
-			lines.add(line);
+		while ( ( line = readNextLine( reader ) ) != null )
+			lines.add( line );
 		return lines.iterator();
 	}
 
 	String readNextLine( BufferedReader reader ) throws IOException {
 		String ln = reader.readLine();
-		if ( ln != null && !isValidClassName(ln) )
-			throw new IOException("Invalid class name: " + ln);
+		if ( ln != null && !isValidClassName( ln ) )
+			throw new IOException( "Invalid class name: " + ln );
 		return ln;
 	}
 
 	boolean isValidClassName( String className ) {
-		return className.indexOf(' ') == NOT_FOUND
-			&& className.indexOf('\t') == NOT_FOUND;
+		return className.indexOf( ' ' ) == NOT_FOUND
+			&& className.indexOf( '\t' ) == NOT_FOUND;
 	}
 }
