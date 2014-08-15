@@ -11,6 +11,10 @@ public class StatelessProvidedProducerOfShorts implements ProducerOfShorts {
 	@Override
 	@Producer
 	public Short produceShort() {
+		return incrementAndReturn();
+	}
+
+	private short incrementAndReturn() {
 		return counter++;
 	}
 }

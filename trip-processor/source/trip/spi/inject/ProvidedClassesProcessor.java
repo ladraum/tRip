@@ -50,27 +50,38 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 	@Override
 	public boolean process( final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv ) {
 		try {
-			process( roundEnv );
+			if ( !roundEnv.processingOver() )
+				process( roundEnv );
+			else
+				flush();
 		} catch ( final IOException e ) {
 			e.printStackTrace();
 		}
-		return true;
+		return false;
 	}
 
 	void process( final RoundEnvironment roundEnv ) throws IOException {
 		processSingletons( roundEnv );
 		processStateless( roundEnv );
 		processProducers( roundEnv );
-		if ( !this.singletons.isEmpty() )
-			createSingletonMetaInf();
-		flush();
 	}
 
-	private void processStateless( RoundEnvironment roundEnv ) throws IOException {
+	void processStateless( RoundEnvironment roundEnv ) throws IOException {
 		final Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith( Stateless.class );
 		for ( final Element element : annotatedElements )
 			if ( element.getKind() == ElementKind.CLASS )
-				memorizeAServiceImplementation( StatelessClass.from( (TypeElement)element ) );
+				createAStatelessClassFrom( StatelessClass.from( (TypeElement)element ) );
+	}
+
+	void createAStatelessClassFrom( final StatelessClass clazz ) throws IOException {
+		final String name = clazz.getGeneratedClassCanonicalName();
+		if ( !classExists( name ) ) {
+			System.out.println( "Generating " + name );
+			final JavaFileObject sourceFile = filer().createSourceFile( name );
+			final Writer writer = sourceFile.openWriter();
+			this.statelessClassGenerator.write( clazz, writer );
+			writer.close();
+		}
 	}
 
 	void processSingletons( final RoundEnvironment roundEnv ) {
@@ -86,24 +97,6 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 		memorizeAServiceImplementation( interfaceClass, implementationClass );
 	}
 
-	void memorizeAServiceImplementation( StatelessClass clazz ) throws IOException {
-		createAStatelessClassFrom( clazz );
-		String interfaceClass = clazz.getTypeCanonicalName();
-		String implementationClass = clazz.getImplementationCanonicalName();
-		memorizeAServiceImplementation( interfaceClass, implementationClass );
-	}
-
-	void createAStatelessClassFrom( final StatelessClass clazz ) throws IOException {
-		final String name = clazz.getGeneratedClassCanonicalName();
-		if ( !classExists( name ) ) {
-			System.out.println( "Generating " + name );
-			final JavaFileObject sourceFile = filer().createSourceFile( name );
-			final Writer writer = sourceFile.openWriter();
-			this.statelessClassGenerator.write( clazz, writer );
-			writer.close();
-		}
-	}
-
 	void memorizeAServiceImplementation( String interfaceClass, String implementationClass ) {
 		Set<String> list = this.singletons.get( interfaceClass );
 		if ( list == null ) {
@@ -114,10 +107,11 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 	}
 
 	private HashSet<String> readAListWithAllCreatedClassesImplementing( final String interfaceClass ) {
-		final LinkedHashSet<String> singletons = new LinkedHashSet<>();
-		for ( final Class<?> implementationClass : ServiceLoader.loadImplementationsFor( interfaceClass ) )
-			singletons.add( implementationClass.getCanonicalName() );
-		return singletons;
+		final LinkedHashSet<String> foundSingletons = new LinkedHashSet<>();
+		for ( final Class<?> implementationClass : ServiceLoader.loadImplementationsFor( interfaceClass ) ) {
+			foundSingletons.add( implementationClass.getCanonicalName() );
+		}
+		return foundSingletons;
 	}
 
 	void processProducers( final RoundEnvironment roundEnv ) throws IOException {
@@ -192,7 +186,9 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 		return this.processingEnv.getFiler();
 	}
 
-	void flush() {
+	void flush() throws IOException {
+		if ( !this.singletons.isEmpty() )
+			createSingletonMetaInf();
 		this.singletons.clear();
 	}
 
