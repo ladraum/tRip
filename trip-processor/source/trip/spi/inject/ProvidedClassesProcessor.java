@@ -20,6 +20,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.tools.Diagnostic.Kind;
 import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
@@ -70,13 +71,20 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 		final Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith( Stateless.class );
 		for ( final Element element : annotatedElements )
 			if ( element.getKind() == ElementKind.CLASS )
-				createAStatelessClassFrom( StatelessClass.from( (TypeElement)element ) );
+				memorizeAServiceImplementation( StatelessClass.from( (TypeElement)element ) );
+	}
+
+	void memorizeAServiceImplementation( StatelessClass clazz ) throws IOException {
+		createAStatelessClassFrom( clazz );
+		String interfaceClass = clazz.getTypeCanonicalName();
+		String implementationClass = clazz.getGeneratedClassCanonicalName();
+		memorizeAServiceImplementation( interfaceClass, implementationClass );
 	}
 
 	void createAStatelessClassFrom( final StatelessClass clazz ) throws IOException {
 		final String name = clazz.getGeneratedClassCanonicalName();
 		if ( !classExists( name ) ) {
-			System.out.println( "Generating " + name );
+			log( "Generating " + name );
 			final JavaFileObject sourceFile = filer().createSourceFile( name );
 			final Writer writer = sourceFile.openWriter();
 			this.statelessClassGenerator.write( clazz, writer );
@@ -124,7 +132,7 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 	void createAProducerFrom( final GenerableClass clazz ) throws IOException {
 		final String name = clazz.getGeneratedClassCanonicalName();
 		if ( !classExists( name ) ) {
-			System.out.println( "Generating " + name );
+			log( "Generating " + name );
 			final JavaFileObject sourceFile = filer().createSourceFile( name );
 			final Writer writer = sourceFile.openWriter();
 			this.factoryProviderClazzTemplate.execute( writer, clazz );
@@ -150,10 +158,11 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 
 	void createSingletonMetaInf() throws IOException {
 		for ( final String interfaceClass : this.singletons.keySet() ) {
-			System.out.println( "Registering service providers for " + interfaceClass );
 			final Writer resource = createResource( SERVICES + interfaceClass );
-			for ( final String implementation : this.singletons.get( interfaceClass ) )
+			for ( final String implementation : this.singletons.get( interfaceClass ) ) {
+				log( "Exposing " + implementation + " as " + interfaceClass );
 				resource.write( implementation + EOL );
+			}
 			resource.close();
 		}
 	}
@@ -186,10 +195,14 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 		return this.processingEnv.getFiler();
 	}
 
+	private void log( String msg ) {
+		System.out.println( msg );
+		processingEnv.getMessager().printMessage( Kind.MANDATORY_WARNING, msg );
+	}
+
 	void flush() throws IOException {
 		if ( !this.singletons.isEmpty() )
 			createSingletonMetaInf();
-		this.singletons.clear();
 	}
 
 	/**
