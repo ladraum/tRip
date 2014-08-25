@@ -97,7 +97,7 @@ Configuring a maven project is easy. Just include the following repository and d
 	</repository>
 ...
 	<properties>
-		<version.trip>1.0.0</version.trip>
+		<version.trip>1.0.1</version.trip>
 	</properties>
 ...
 	<dependency>
@@ -119,4 +119,4 @@ Configuring a maven project is easy. Just include the following repository and d
 ```
 
 ### License
-rTip is Apache 2.0 licensed.
+tRip is Apache 2.0 licensed.
