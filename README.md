@@ -24,7 +24,7 @@ public interface Storage {
 	void store( Object data );
 }
 
-@Singleton
+@Singleton( exposedAs=Storage.class )
 public class IndexedStorage implements Storage {
 	Map<Long, List<Object>> indexById = new HashMap<>();
 
