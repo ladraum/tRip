@@ -18,12 +18,10 @@ public class StatelessAndSingletonServicesAtSameInterface {
 
 	@Test
 	public void ensureThatCouldFoundBothImplementations() throws ServiceProviderException {
-		val services = provider.loadAllServicesImplementingTheInterface( Runnable.class );
+		val services = provider.loadAll( Runnable.class );
 		val list = new ArrayList<Runnable>();
-		for ( val service : services ) {
+		for ( val service : services )
 			list.add( service );
-			System.out.println( service );
-		}
 		assertThat( list.size(), is( 2 ) );
 	}
 }

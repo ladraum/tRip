@@ -105,7 +105,7 @@ public class ServiceProvider {
 		return iterable;
 	}
 
-	public <T> Iterable<T> loadAllServicesImplementingTheInterface( final Class<T> interfaceClazz )
+	protected <T> Iterable<T> loadAllServicesImplementingTheInterface( final Class<T> interfaceClazz )
 			throws ServiceProviderException {
 		final CachedIterable<T> iterable = loadServiceProvidersFor( interfaceClazz );
 		providerFor( interfaceClazz, iterable );
