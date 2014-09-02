@@ -6,11 +6,12 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import trip.spi.Provided;
+import trip.spi.ProvidedServices;
 import trip.spi.ServiceProvider;
 import trip.spi.ServiceProviderException;
 
 @RequiredArgsConstructor
-@SuppressWarnings( "rawtypes" )
+// @SuppressWarnings( "rawtypes" )
 public class ProvidableClass<T> {
 
 	final Class<T> targetClazz;
@@ -39,6 +40,8 @@ public class ProvidableClass<T> {
 	static void populateWithProvidableFields( Class<?> targetClazz, List<ProvidableField> providableFields ) {
 		for ( Field field : targetClazz.getDeclaredFields() )
 			if ( field.isAnnotationPresent( Provided.class ) )
-				providableFields.add( ProvidableField.wrap( field ) );
+				providableFields.add( SingleElementProvidableField.from( field ) );
+			else if ( field.isAnnotationPresent( ProvidedServices.class ) )
+				providableFields.add( ManyElementsProvidableField.from( field ) );
 	}
 }
