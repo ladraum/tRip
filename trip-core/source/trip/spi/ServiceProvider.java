@@ -100,7 +100,11 @@ public class ServiceProvider {
 	public <T> Iterable<T> loadAll( final Class<T> interfaceClazz ) throws ServiceProviderException {
 		Iterable<T> iterable = (Iterable<T>)this.providers.get( interfaceClazz );
 		if ( iterable == null ) {
-			iterable = loadAllServicesImplementingTheInterface( interfaceClazz );
+			synchronized ( providers ) {
+				iterable = (Iterable<T>)this.providers.get( interfaceClazz );
+				if ( iterable == null )
+					iterable = loadAllServicesImplementingTheInterface( interfaceClazz );
+			}
 		}
 		return iterable;
 	}
