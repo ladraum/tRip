@@ -1,5 +1,6 @@
 package trip.spi.inject.stateless;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +12,8 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
+import trip.spi.PostConstruct;
+import trip.spi.PreDestroy;
 import trip.spi.inject.GenerableClass;
 import trip.spi.inject.SingletonImplementation;
 
@@ -57,8 +60,29 @@ public class StatelessClass implements GenerableClass {
 	 */
 	final List<ExposedMethod> exposedMethods;
 
+	/**
+	 * A list of methods that run after construct the Stateless service.
+	 */
+	final List<ExposedMethod> postConstructMethods;
+
+	/**
+	 * A list of methods that run before destroy the Stateless service.
+	 */
+	final List<ExposedMethod> preDestroyMethods;
+
+	/**
+	 * @param serviceIdentificationName
+	 * @param typeCanonicalName
+	 * @param implementationCanonicalName
+	 * @param exposedByClass
+	 * @param exposedMethods
+	 * @param postConstructMethods
+	 * @param preDestroyMethods
+	 */
 	public StatelessClass( String serviceIdentificationName, String typeCanonicalName,
-			String implementationCanonicalName, boolean exposedByClass, List<ExposedMethod> exposedMethods ) {
+		String implementationCanonicalName, boolean exposedByClass,
+		List<ExposedMethod> exposedMethods, List<ExposedMethod> postConstructMethods,
+		List<ExposedMethod> preDestroyMethods ) {
 		this.serviceIdentificationName = serviceIdentificationName;
 		this.packageName = extractPackageNameFrom( implementationCanonicalName );
 		this.typeCanonicalName = typeCanonicalName;
@@ -66,6 +90,8 @@ public class StatelessClass implements GenerableClass {
 		this.implementationCanonicalName = implementationCanonicalName;
 		this.exposedByClass = exposedByClass;
 		this.exposedMethods = exposedMethods;
+		this.postConstructMethods = postConstructMethods;
+		this.preDestroyMethods = preDestroyMethods;
 		this.identifaction = createIdentifier();
 	}
 
@@ -89,7 +115,6 @@ public class StatelessClass implements GenerableClass {
 		return buffer.toString();
 	}
 
-	// smaple.generated.Class
 	String extractPackageNameFrom( String canonicalName ) {
 		return canonicalName.replaceFirst( "(.*)\\.[^\\.]+", "$1" );
 	}
@@ -144,8 +169,10 @@ public class StatelessClass implements GenerableClass {
 		String implementationCanonicalName = type.asType().toString();
 		boolean exposedByClass = isImplementingClass( typeCanonicalName, type );
 		List<ExposedMethod> exposedMethods = retrieveExposedMethods( type );
-		return new StatelessClass( serviceIdentificationName, typeCanonicalName, implementationCanonicalName, exposedByClass,
-				exposedMethods );
+		return new StatelessClass( serviceIdentificationName, typeCanonicalName,
+			implementationCanonicalName, exposedByClass, exposedMethods,
+			retrieveMethodsAnnotatedWith( type, PostConstruct.class, javax.annotation.PostConstruct.class ),
+			retrieveMethodsAnnotatedWith( type, PreDestroy.class, javax.annotation.PreDestroy.class ) );
 	}
 
 	public static boolean isImplementingClass( String typeCanonicalName, TypeElement type ) {
@@ -164,6 +191,20 @@ public class StatelessClass implements GenerableClass {
 			if ( isExposedMethod( method ) )
 				list.add( ExposedMethod.from( (ExecutableElement)method ) );
 		}
+		return list;
+	}
+
+	@SafeVarargs
+	static List<ExposedMethod> retrieveMethodsAnnotatedWith( TypeElement type,
+		Class<? extends Annotation>... annotations ) {
+		List<ExposedMethod> list = new ArrayList<ExposedMethod>();
+		for ( Class<? extends Annotation> annotation : annotations )
+			for ( Element method : type.getEnclosedElements() ) {
+				if ( isExposedMethod( method )
+					&& method.getAnnotation( annotation ) != null ) {
+					list.add( ExposedMethod.from( (ExecutableElement)method ) );
+				}
+			}
 		return list;
 	}
 

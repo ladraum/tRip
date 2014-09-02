@@ -8,7 +8,13 @@ final public class InterfaceStateless1612123513
 
 	public void voidMethod(  ) {
 		try {
-			newInstance().voidMethod(  );
+			final sample.project.ServiceFromInterface instance = newInstance();
+			postConstructInterface1612123513( instance );
+			try {
+				instance.voidMethod(  );
+			} finally {
+				preDestroyInterface1612123513( instance );
+			}
 		} catch ( Throwable cause ) {
 			throw new RuntimeException( cause );
 		}
@@ -16,15 +22,32 @@ final public class InterfaceStateless1612123513
 
 	public Long sum( Double arg0,Integer arg1 ) {
 		try {
-			return newInstance().sum( arg0,arg1 );
+			final sample.project.ServiceFromInterface instance = newInstance();
+			postConstructInterface1612123513( instance );
+			try {
+				final Long returnValue = instance.sum( arg0,arg1 );
+				return returnValue;
+			} finally {
+				preDestroyInterface1612123513( instance );
+			}
 		} catch ( Throwable cause ) {
 			throw new RuntimeException( cause );
 		}
 	}
 
 	sample.project.ServiceFromInterface newInstance() throws trip.spi.ServiceProviderException {
-		sample.project.ServiceFromInterface instance = new sample.project.ServiceFromInterface();
+		final sample.project.ServiceFromInterface instance = new sample.project.ServiceFromInterface();
 		provider.provideOn( instance );
 		return instance;
+	}
+	
+	void postConstructInterface1612123513(
+			final sample.project.ServiceFromInterface instance ) throws Throwable {
+		instance.sum();
+	}
+	
+	void preDestroyInterface1612123513(
+			final sample.project.ServiceFromInterface instance ) throws Throwable {
+		instance.voidMethod();
 	}
 }

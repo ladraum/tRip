@@ -19,12 +19,19 @@ final public class {{typeName}}Stateless{{identifaction}}
 
 	public {{{returnType}}} {{name}}( {{{parametersWithTypesAsString}}} ) {
 		try {
-			{{#returnable}}
-			return newInstance().{{name}}( {{parametersAsString}} );
-			{{/returnable}}
-			{{^returnable}}
-			newInstance().{{name}}( {{parametersAsString}} );
-			{{/returnable}}
+			final {{{implementationCanonicalName}}} instance = newInstance();
+			postConstruct{{typeName}}{{identifaction}}( instance );
+			try {
+				{{#returnable}}
+				final {{{returnType}}} returnValue = instance.{{name}}( {{parametersAsString}} );
+				return returnValue;
+				{{/returnable}}
+				{{^returnable}}
+				instance.{{name}}( {{parametersAsString}} );
+				{{/returnable}}
+			} finally {
+				preDestroy{{typeName}}{{identifaction}}( instance );
+			}
 		} catch ( Throwable cause ) {
 			throw new RuntimeException( cause );
 		}
@@ -32,8 +39,22 @@ final public class {{typeName}}Stateless{{identifaction}}
 	{{/exposedMethods}}
 
 	{{{implementationCanonicalName}}} newInstance() throws trip.spi.ServiceProviderException {
-		{{{implementationCanonicalName}}} instance = new {{{implementationCanonicalName}}}();
+		final {{{implementationCanonicalName}}} instance = new {{{implementationCanonicalName}}}();
 		provider.provideOn( instance );
 		return instance;
+	}
+	
+	void postConstruct{{typeName}}{{identifaction}}(
+			final {{{implementationCanonicalName}}} instance ) throws Throwable {
+		{{#postConstructMethods}}
+		instance.{{name}}();
+		{{/postConstructMethods}}
+	}
+	
+	void preDestroy{{typeName}}{{identifaction}}(
+			final {{{implementationCanonicalName}}} instance ) throws Throwable {
+		{{#preDestroyMethods}}
+		instance.{{name}}();
+		{{/preDestroyMethods}}
 	}
 }
