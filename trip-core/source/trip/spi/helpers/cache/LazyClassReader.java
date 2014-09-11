@@ -73,7 +73,7 @@ public class LazyClassReader<S> implements Iterator<Class<S>> {
 			Class<S> clazz = (Class<S>)Class.forName( classCanonicalName, false, loader );
 			cache.add( clazz );
 			return clazz;
-		} catch ( ClassNotFoundException cause ) {
+		} catch ( ClassNotFoundException | NoClassDefFoundError cause ) {
 			throw new IllegalStateException( cause );
 		}
 	}
