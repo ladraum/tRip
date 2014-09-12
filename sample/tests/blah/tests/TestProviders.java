@@ -6,6 +6,6 @@ public class TestProviders {
 
 	@Producer( name = "date-format" )
 	public String createDateFormat() {
-		return "yyyyMMdd";
+		return "yyyyMMddHHmmss";
 	}
 }

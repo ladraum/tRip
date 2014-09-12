@@ -1,10 +1,10 @@
 package blah.tests;
 
-import lombok.Delegate;
+import lombok.val;
+import lombok.experimental.Delegate;
 import lombok.experimental.ExtensionMethod;
 import trip.spi.ServiceProvider;
 import trip.spi.ServiceProviderException;
-import trip.spi.helpers.filter.Condition;
 
 @SuppressWarnings( "unchecked" )
 @ExtensionMethod( Commons.class )
@@ -13,13 +13,12 @@ public class DefaultConverter<T> {
 	@Delegate
 	Converter<T> converter;
 
-	public DefaultConverter( Class<T> targetClass ) throws ServiceProviderException {
+	public DefaultConverter( final Class<T> targetClass ) throws ServiceProviderException {
 		this.converter = extractDefaultConverterFor( targetClass );
 	}
 
-	@SuppressWarnings( "rawtypes" )
-	private Converter<T> extractDefaultConverterFor( Class<T> targetClass ) throws ServiceProviderException {
-		Condition<Converter> matcher = new GenericTypeMatcher<>( targetClass );
+	private Converter<T> extractDefaultConverterFor( final Class<T> targetClass ) throws ServiceProviderException {
+		val matcher = new GenericTypeMatcher<>( targetClass );
 		return new ServiceProvider().load( Converter.class, matcher );
 	}
 }
