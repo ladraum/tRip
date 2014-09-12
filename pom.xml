@@ -59,8 +59,8 @@
 
 	<properties>
 		<!-- Dependencies Versions -->
-		<version.junit>4.10</version.junit>
-		<version.lombok>1.12.4</version.lombok>
+		<version.junit>4.11</version.junit>
+		<version.lombok>1.14.4</version.lombok>
 		<version.mockito>1.9.5</version.mockito>
 		<version.config>1.2.0</version.config>
 		<version.mustache>0.8.14</version.mustache>
