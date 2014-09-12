@@ -1,6 +1,6 @@
 package trip.spi.tests;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
@@ -19,14 +19,14 @@ public class InjectionOfServiceDefinedByItsExposedTypeTest {
 
 	@Test
 	public void ensureThatAreAbleToLoadSerializableBeanExposedAsSerializable() throws ServiceProviderException {
-		Bean loaded = provider.load( Bean.class );
-		assertThat( loaded, is( SerializableBean.class ) );
+		final Bean loaded = provider.load( Bean.class );
+		assertThat( loaded, instanceOf( SerializableBean.class ) );
 	}
 
 	@Test
 	public void ensureThatCouldProvideSerializableBeanExposedAsSerializable() throws ServiceProviderException {
 		provider.provideOn( this );
 		assertNotNull( bean );
-		assertThat( bean, is( SerializableBean.class ) );
+		assertThat( bean, instanceOf( SerializableBean.class ) );
 	}
 }

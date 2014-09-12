@@ -1,6 +1,6 @@
 package trip.spi.tests;
 
-import lombok.Delegate;
+import lombok.experimental.Delegate;
 import trip.spi.Provided;
 import trip.spi.Singleton;
 

@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import lombok.Delegate;
+import lombok.experimental.Delegate;
 import lombok.experimental.ExtensionMethod;
 import trip.spi.ProducerFactory;
 import trip.spi.helpers.filter.Condition;
@@ -20,24 +20,24 @@ public class ProducerFactoryMap implements Map<Class<?>, List<ProducerFactory<?>
 	final Map<Class<?>, List<ProducerFactory<?>>> map = new HashMap<>();
 
 	@SuppressWarnings("rawtypes")
-	public static ProducerFactoryMap from( Iterable<ProducerFactory> iterable ) {
-		ProducerFactoryMap providers = new ProducerFactoryMap();
-		for ( ProducerFactory<?> provider : iterable ) {
-			Class<?> clazz = getGenericClassFrom( provider );
+	public static ProducerFactoryMap from( final Iterable<ProducerFactory> iterable ) {
+		final ProducerFactoryMap providers = new ProducerFactoryMap();
+		for ( final ProducerFactory<?> provider : iterable ) {
+			final Class<?> clazz = getGenericClassFrom( provider );
 			providers.memorizeProviderForClazz(provider, clazz);
 		}
 		return providers;
 	}
 
-	private static Class<?> getGenericClassFrom( ProducerFactory<?> provider ) {
-		Type[] types = provider.getClass().getGenericInterfaces();
-		for ( Type type : types )
+	private static Class<?> getGenericClassFrom( final ProducerFactory<?> provider ) {
+		final Type[] types = provider.getClass().getGenericInterfaces();
+		for ( final Type type : types )
 			if ( ( (ParameterizedType)type ).getRawType().equals( ProducerFactory.class ) )
 				return (Class<?>)( (ParameterizedType)type ).getActualTypeArguments()[0];
 		return null;
 	}
 
-	public void memorizeProviderForClazz( ProducerFactory<?> provider, Class<?> clazz ) {
+	public void memorizeProviderForClazz( final ProducerFactory<?> provider, final Class<?> clazz ) {
 		List<ProducerFactory<?>> iterable = map.get( clazz );
 		if ( iterable == null ) {
 			iterable = new ArrayList<>();
@@ -46,10 +46,10 @@ public class ProducerFactoryMap implements Map<Class<?>, List<ProducerFactory<?>
 		iterable.add( provider );
 	}
 
-	public ProducerFactory<?> get( Class<?> clazz, Condition<?> condition ) {
-		List<ProducerFactory<?>> list = get( clazz );
+	public ProducerFactory<?> get( final Class<?> clazz, final Condition<?> condition ) {
+		final List<ProducerFactory<?>> list = get( clazz );
 		if ( list == null )
 			return null;
-		return (ProducerFactory<?>)list.first(condition);
+		return list.first(condition);
 	}
 }
