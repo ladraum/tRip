@@ -1,6 +1,7 @@
 package trip.spi.helpers.cache;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -53,6 +54,8 @@ public class LazyClassReader<S> implements Iterator<Class<S>> {
 			if ( currentResourceLines == null || !currentResourceLines.hasNext() )
 				readNextResourceFile();
 			return currentResourceLines != null && currentResourceLines.hasNext();
+		} catch ( FileNotFoundException cause ) {
+			return false;
 		} catch ( IOException cause ) {
 			throw new IllegalStateException( cause );
 		}
