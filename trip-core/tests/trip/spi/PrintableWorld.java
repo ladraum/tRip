@@ -1,5 +1,8 @@
 package trip.spi;
 
+import lombok.Getter;
+
+@Getter
 public class PrintableWorld implements PrintableWord {
 
 	@Provided( name = "period" )

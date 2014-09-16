@@ -6,6 +6,7 @@ package {{packageName}};
 {{^serviceIdentificationName}}
 @trip.spi.Singleton( exposedAs={{typeCanonicalName}}.class )
 {{/serviceIdentificationName}}
+@trip.spi.GeneratedFromStatelessService
 final public class {{typeName}}Stateless{{identifaction}}
 {{#exposedByClass}}
 	extends {{{typeCanonicalName}}} {

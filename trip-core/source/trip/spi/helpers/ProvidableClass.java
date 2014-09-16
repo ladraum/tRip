@@ -5,13 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
+import trip.spi.GeneratedFromStatelessService;
 import trip.spi.Provided;
 import trip.spi.ProvidedServices;
 import trip.spi.ServiceProvider;
 import trip.spi.ServiceProviderException;
 
 @RequiredArgsConstructor
-// @SuppressWarnings( "rawtypes" )
 public class ProvidableClass<T> {
 
 	final Class<T> targetClazz;
@@ -32,6 +32,8 @@ public class ProvidableClass<T> {
 		Class<? extends Object> clazz = targetClazz;
 		while ( !Object.class.equals( clazz ) ) {
 			populateWithProvidableFields( clazz, providableFields );
+			if ( clazz.isAnnotationPresent(GeneratedFromStatelessService.class) )
+				break;
 			clazz = clazz.getSuperclass();
 		}
 		return providableFields;
