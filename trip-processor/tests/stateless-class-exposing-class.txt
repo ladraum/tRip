@@ -1,7 +1,8 @@
 package sample.project;
 
 @trip.spi.Singleton( name="my-self", exposedAs=sample.project.ServiceFromInterface.class )
-final public class ServiceFromInterfaceStateless3994859186
+@trip.spi.GeneratedFromStatelessService
+public class ServiceFromInterfaceStateless3994859186
 	extends sample.project.ServiceFromInterface {
 
 	@trip.spi.Provided trip.spi.ServiceProvider provider;
