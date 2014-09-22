@@ -2,7 +2,7 @@ package trip.spi;
 
 import java.util.HashMap;
 import java.util.Map;
-// import java.util.ServiceLoader;
+import java.util.ServiceConfigurationError;
 
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
@@ -99,22 +99,27 @@ public class ServiceProvider {
 	@SuppressWarnings( "unchecked" )
 	public <T> Iterable<T> loadAll( final Class<T> interfaceClazz ) throws ServiceProviderException {
 		Iterable<T> iterable = (Iterable<T>)this.providers.get( interfaceClazz );
-		if ( iterable == null ) {
+		if ( iterable == null )
 			synchronized ( providers ) {
 				iterable = (Iterable<T>)this.providers.get( interfaceClazz );
 				if ( iterable == null )
 					iterable = loadAllServicesImplementingTheInterface( interfaceClazz );
 			}
-		}
 		return iterable;
 	}
 
 	protected <T> Iterable<T> loadAllServicesImplementingTheInterface( final Class<T> interfaceClazz )
 			throws ServiceProviderException {
-		final CachedIterable<T> iterable = loadServiceProvidersFor( interfaceClazz );
-		providerFor( interfaceClazz, iterable );
-		provideOn( iterable );
-		return iterable;
+		try {
+			final CachedIterable<T> iterable = loadServiceProvidersFor( interfaceClazz );
+			provideOn( iterable );
+			providerFor( interfaceClazz, iterable );
+			return iterable;
+		} catch ( final StackOverflowError cause ) {
+			throw new ServiceConfigurationError(
+				"Could not load implementations of " + interfaceClazz.getCanonicalName() +
+					": Recursive dependency injection detected." );
+		}
 	}
 
 	protected <T> CachedIterable<T> loadServiceProvidersFor(
@@ -142,10 +147,14 @@ public class ServiceProvider {
 	@SuppressWarnings( { "rawtypes", "unchecked" } )
 	public <T> Iterable<Class<T>> loadClassesImplementing( final Class<T> interfaceClazz ) {
 		Iterable<Class<T>> implementations = (Iterable)implementedClasses.get( interfaceClazz );
-		if ( implementations == null ) {
-			implementations = ServiceLoader.loadImplementationsFor( interfaceClazz );
-			implementedClasses.put( (Class)interfaceClazz, (Iterable)implementations );
-		}
+		if ( implementations == null )
+			synchronized ( implementedClasses ) {
+				implementations = (Iterable)implementedClasses.get( interfaceClazz );
+				if ( implementations == null ) {
+					implementations = ServiceLoader.loadImplementationsFor( interfaceClazz );
+					implementedClasses.put( (Class)interfaceClazz, (Iterable)implementations );
+				}
+			}
 		return implementations;
 	}
 
@@ -177,10 +186,14 @@ public class ServiceProvider {
 
 	private ProvidableClass<?> retrieveProvidableClass( final Class<?> targetClazz ) {
 		ProvidableClass<?> providableClass = providableClassCache.get( targetClazz );
-		if ( providableClass == null ) {
-			providableClass = ProvidableClass.wrap( targetClazz );
-			providableClassCache.put( targetClazz, providableClass );
-		}
+		if ( providableClass == null )
+			synchronized ( providableClassCache ) {
+				providableClass = providableClassCache.get( targetClazz );
+				if ( providableClass == null ) {
+					providableClass = ProvidableClass.wrap( targetClazz );
+					providableClassCache.put( targetClazz, providableClass );
+				}
+			}
 		return providableClass;
 	}
 

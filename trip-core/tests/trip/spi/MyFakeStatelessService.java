@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 @GeneratedFromStatelessService
 @Singleton( name="FakeStatelessService" )
-public class MyFakeStatelessService extends PrintableHello {
+public class MyFakeStatelessService extends Readable {
 
 	@Provided
 	Printable printable;
