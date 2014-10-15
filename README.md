@@ -6,7 +6,7 @@ tRip was designed to:
 - Take care of Singleton's and Stateless' services for your
 - Allow you to create modules and extensions to your software without change one LOC in the core implementation
 - Fast warm-up: tRip already knows what to provide in compilation phase, there's no need to look into the entire class-path for provided classes
-- Zero configuration: just let the [ServiceProvider](https://github.com/Skullabs/tRip/wiki/Intro:-My-First-Modular-App) run the software for you
+- Zero configuration: just let the [ServiceProvider](https://github.com/Skullabs/tRip/wiki/Getting-Started:-My-First-Modular-App) run the software for you
 - Factory-based creation of services: you can take control of how a service is provided creating your own factory
 - Manually provided data: you still can provide data manually to your software context.
 
