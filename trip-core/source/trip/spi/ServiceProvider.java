@@ -30,7 +30,18 @@ public class ServiceProvider {
 
 	public ServiceProvider() {
 		this.providers = createDefaultProvidedData();
+		runAllStartupListeners();
 		this.producers = loadAllProducers();
+	}
+
+	void runAllStartupListeners() {
+		try {
+			final Iterable<StartupListener> startupListeners = loadAll( StartupListener.class );
+			for ( final StartupListener listener : startupListeners )
+				listener.onStartup( this );
+		} catch ( final ServiceProviderException e ) {
+			throw new IllegalStateException( e );
+		}
 	}
 
 	protected HashMap<Class<?>, Iterable<?>> createDefaultProvidedData() {

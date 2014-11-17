@@ -3,6 +3,7 @@ package trip.spi.helpers;
 import java.lang.reflect.Field;
 
 import lombok.Value;
+import lombok.extern.java.Log;
 import trip.spi.Provided;
 import trip.spi.ProviderContext;
 import trip.spi.ServiceProvider;
@@ -12,6 +13,7 @@ import trip.spi.helpers.filter.Condition;
 import trip.spi.helpers.filter.IsAssignableFrom;
 import trip.spi.helpers.filter.NamedObject;
 
+@Log
 @Value
 public class SingleElementProvidableField<T> implements ProvidableField {
 
@@ -24,6 +26,8 @@ public class SingleElementProvidableField<T> implements ProvidableField {
 	public void provide( final Object instance, final ServiceProvider provider )
 		throws ServiceProviderException, IllegalArgumentException, IllegalAccessException {
 		final Object value = provider.load( fieldType, condition, providerContext );
+		if ( value == null )
+			log.warning( "No data found for " + fieldType.getCanonicalName() );
 		set( instance, value );
 	}
 
@@ -34,8 +38,8 @@ public class SingleElementProvidableField<T> implements ProvidableField {
 	@SuppressWarnings( { "unchecked", "rawtypes" } )
 	public static <T> ProvidableField from( final Field field ) {
 		field.setAccessible( true );
-		Provided provided = field.getAnnotation( Provided.class );
-		Class expectedClass = provided.exposedAs().equals( Provided.class )
+		final Provided provided = field.getAnnotation( Provided.class );
+		final Class expectedClass = provided.exposedAs().equals( Provided.class )
 			? field.getType() : provided.exposedAs();
 		return new SingleElementProvidableField<T>(
 			field, (Class<T>)expectedClass,

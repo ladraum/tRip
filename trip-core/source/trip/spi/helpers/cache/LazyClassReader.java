@@ -27,7 +27,7 @@ public class LazyClassReader<S> implements Iterator<Class<S>> {
 	final Enumeration<URL> resources;
 	Iterator<String> currentResourceLines;
 
-	public LazyClassReader( Class<S> serviceClass, ClassLoader loader ) {
+	public LazyClassReader( final Class<S> serviceClass, final ClassLoader loader ) {
 		this( serviceClass.getCanonicalName(), loader );
 	}
 
@@ -41,9 +41,9 @@ public class LazyClassReader<S> implements Iterator<Class<S>> {
 
 	Enumeration<URL> readAllServiceResources() {
 		try {
-			String fullName = PREFIX + serviceClassCanonicalName;
+			final String fullName = PREFIX + serviceClassCanonicalName;
 			return loader.getResources( fullName );
-		} catch ( IOException cause ) {
+		} catch ( final IOException cause ) {
 			throw new ServiceConfigurationError( serviceClassCanonicalName + ": " + cause.getMessage(), cause );
 		}
 	}
@@ -54,16 +54,16 @@ public class LazyClassReader<S> implements Iterator<Class<S>> {
 			if ( currentResourceLines == null || !currentResourceLines.hasNext() )
 				readNextResourceFile();
 			return currentResourceLines != null && currentResourceLines.hasNext();
-		} catch ( FileNotFoundException cause ) {
+		} catch ( final FileNotFoundException cause ) {
 			return false;
-		} catch ( IOException cause ) {
+		} catch ( final IOException cause ) {
 			throw new IllegalStateException( cause );
 		}
 	}
 
 	void readNextResourceFile() throws IOException {
 		if ( getResources().hasMoreElements() ) {
-			URL nextElement = getResources().nextElement();
+			final URL nextElement = getResources().nextElement();
 			currentResourceLines = readLines( nextElement );
 		}
 	}
@@ -71,13 +71,13 @@ public class LazyClassReader<S> implements Iterator<Class<S>> {
 	@Override
 	@SuppressWarnings( "unchecked" )
 	public Class<S> next() {
+		final String classCanonicalName = currentResourceLines.next();
 		try {
-			String classCanonicalName = currentResourceLines.next();
-			Class<S> clazz = (Class<S>)Class.forName( classCanonicalName, false, loader );
+			final Class<S> clazz = (Class<S>)Class.forName( classCanonicalName, false, loader );
 			cache.add( clazz );
 			return clazz;
 		} catch ( ClassNotFoundException | NoClassDefFoundError cause ) {
-			throw new IllegalStateException( cause );
+			throw new IllegalStateException( "Could not read class " + classCanonicalName, cause );
 		}
 	}
 
@@ -85,26 +85,28 @@ public class LazyClassReader<S> implements Iterator<Class<S>> {
 	public void remove() {
 	}
 
-	Iterator<String> readLines( URL url ) throws IOException {
+	Iterator<String> readLines( final URL url ) throws IOException {
 		@Cleanup
+		final
 		InputStream inputStream = url.openStream();
 		@Cleanup
+		final
 		BufferedReader reader = new BufferedReader( new InputStreamReader( inputStream, "utf-8" ) );
-		List<String> lines = new ArrayList<String>();
+		final List<String> lines = new ArrayList<String>();
 		String line = null;
 		while ( ( line = readNextLine( reader ) ) != null )
 			lines.add( line );
 		return lines.iterator();
 	}
 
-	String readNextLine( BufferedReader reader ) throws IOException {
-		String ln = reader.readLine();
+	String readNextLine( final BufferedReader reader ) throws IOException {
+		final String ln = reader.readLine();
 		if ( ln != null && !isValidClassName( ln ) )
 			throw new IOException( "Invalid class name: " + ln );
 		return ln;
 	}
 
-	boolean isValidClassName( String className ) {
+	boolean isValidClassName( final String className ) {
 		return className.indexOf( ' ' ) == NOT_FOUND
 			&& className.indexOf( '\t' ) == NOT_FOUND;
 	}
