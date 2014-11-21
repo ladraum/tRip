@@ -2,12 +2,12 @@ package trip.spi.inject.stateless;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import org.junit.Test;
 
@@ -58,20 +58,23 @@ public class StatelessClassGeneratorTest {
 		return new ExposedMethod( "voidMethod", "void", emptyStringList() );
 	}
 
-	@SuppressWarnings( "unchecked" )
-	<T> List<T> list( T... ts ) {
-		List<T> list = new ArrayList<T>();
-		for ( T t : ts )
+	<T> List<T> list( final T... ts ) {
+		final List<T> list = new ArrayList<T>();
+		for ( final T t : ts )
 			list.add( t );
 		return list;
 	}
 
 	List<String> emptyStringList() {
-		return new ArrayList<>();
+		return new ArrayList<String>();
 	}
 
-	String readFile( String name ) throws IOException {
-		byte[] allReadBytes = Files.readAllBytes( Paths.get( name ) );
-		return new String( allReadBytes );
+	String readFile( final String name ) throws IOException {
+		final Scanner scanner = new Scanner( new File( name ) );
+		try {
+			return scanner.useDelimiter( "\\Z" ).next();
+		} finally {
+			scanner.close();
+		}
 	}
 }

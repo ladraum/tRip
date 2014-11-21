@@ -18,7 +18,7 @@ public class DefaultConverter<T> {
 	}
 
 	private Converter<T> extractDefaultConverterFor( final Class<T> targetClass ) throws ServiceProviderException {
-		val matcher = new GenericTypeMatcher<>( targetClass );
+		val matcher = new GenericTypeMatcher<T>( targetClass );
 		return new ServiceProvider().load( Converter.class, matcher );
 	}
 }

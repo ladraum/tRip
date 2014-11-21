@@ -39,7 +39,7 @@ public class ManyElementsProvidableField<T> implements ProvidableField {
 			(Condition<T>)extractInjectionFilterCondition( field ) );
 	}
 
-	static void assertFieldTypeIsIterable( Field field ) {
+	static void assertFieldTypeIsIterable( final Field field ) {
 		if ( !Iterable.class.equals( field.getType() ) )
 			throw new IllegalStateException( "Field " + field.getName() + " expects to have Iterable type." );
 	}
@@ -47,7 +47,7 @@ public class ManyElementsProvidableField<T> implements ProvidableField {
 	static Condition<?> extractInjectionFilterCondition( final Field field ) {
 		val annotation = field.getAnnotation( ProvidedServices.class );
 		if ( !annotation.name().isEmpty() )
-			return new NamedObject<>( annotation.name() );
-		return new AnyObject<>();
+			return new NamedObject<Object>( annotation.name() );
+		return new AnyObject<Object>();
 	}
 }

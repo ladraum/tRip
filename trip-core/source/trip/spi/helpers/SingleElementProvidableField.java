@@ -53,7 +53,7 @@ public class SingleElementProvidableField<T> implements ProvidableField {
 
 		final Provided annotation = field.getAnnotation( Provided.class );
 		if ( !annotation.name().isEmpty() )
-			conditions.add( new NamedObject<>( annotation.name() ) );
+			conditions.add( new NamedObject<Object>( annotation.name() ) );
 
 		return conditions;
 	}

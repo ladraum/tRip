@@ -190,7 +190,7 @@ public class ServiceProvider {
 		try {
 			final ProvidableClass<?> providableClass = retrieveProvidableClass( object.getClass() );
 			providableClass.provide( object, this );
-		} catch ( IllegalArgumentException | IllegalAccessException cause ) {
+		} catch ( final Exception cause ) {
 			throw new ServiceProviderException( cause );
 		}
 	}

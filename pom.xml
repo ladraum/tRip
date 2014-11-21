@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>io.skullabs.trip</groupId>
-	<version>1.2.0</version>
+	<version>1.2.1</version>
 	<artifactId>trip-parent</artifactId>
 	<name>tRip</name>
 	<packaging>pom</packaging>
@@ -198,8 +198,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>${version.maven.plugin}</version>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>1.6</source>
+					<target>1.6</target>
 					<optimize>false</optimize>
 					<debug>true</debug>
 					<encoding>UTF-8</encoding>

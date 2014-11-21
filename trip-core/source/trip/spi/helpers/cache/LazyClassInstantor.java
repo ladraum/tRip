@@ -28,7 +28,10 @@ public class LazyClassInstantor<T> implements Iterator<T> {
 			final T instance = clazz.newInstance();
 			cache.add(instance);
 			return instance;
-		} catch (InstantiationException | IllegalAccessException cause) {
+		} catch ( final IllegalAccessException cause ) {
+			log.warning( cause.getMessage() );
+			throw new IllegalStateException( cause );
+		} catch ( final InstantiationException cause ) {
 			log.warning( cause.getMessage() );
 			throw new IllegalStateException(cause);
 		}

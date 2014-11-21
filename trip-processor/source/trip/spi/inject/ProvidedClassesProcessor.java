@@ -45,7 +45,7 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 
 	final DefaultMustacheFactory mustacheFactory = new DefaultMustacheFactory();
 	final Mustache factoryProviderClazzTemplate = this.mustacheFactory.compile( "META-INF/provided-class.mustache" );
-	final Map<String, Set<String>> singletons = new HashMap<>();
+	final Map<String, Set<String>> singletons = new HashMap<String, Set<String>>();
 	final StatelessClassGenerator statelessClassGenerator = new StatelessClassGenerator();
 
 	@Override
@@ -67,17 +67,17 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 		processProducers( roundEnv );
 	}
 
-	void processStateless( RoundEnvironment roundEnv ) throws IOException {
+	void processStateless( final RoundEnvironment roundEnv ) throws IOException {
 		final Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith( Stateless.class );
 		for ( final Element element : annotatedElements )
 			if ( element.getKind() == ElementKind.CLASS )
 				memorizeAServiceImplementation( StatelessClass.from( (TypeElement)element ) );
 	}
 
-	void memorizeAServiceImplementation( StatelessClass clazz ) throws IOException {
+	void memorizeAServiceImplementation( final StatelessClass clazz ) throws IOException {
 		createAStatelessClassFrom( clazz );
-		String interfaceClass = clazz.getTypeCanonicalName();
-		String implementationClass = clazz.getGeneratedClassCanonicalName();
+		final String interfaceClass = clazz.getTypeCanonicalName();
+		final String implementationClass = clazz.getGeneratedClassCanonicalName();
 		memorizeAServiceImplementation( interfaceClass, implementationClass );
 	}
 
@@ -100,12 +100,12 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 	}
 
 	void memorizeAServiceImplementation( final SingletonImplementation from ) {
-		String interfaceClass = from.interfaceClass();
-		String implementationClass = from.implementationClass();
+		final String interfaceClass = from.interfaceClass();
+		final String implementationClass = from.implementationClass();
 		memorizeAServiceImplementation( interfaceClass, implementationClass );
 	}
 
-	void memorizeAServiceImplementation( String interfaceClass, String implementationClass ) {
+	void memorizeAServiceImplementation( final String interfaceClass, final String implementationClass ) {
 		Set<String> list = this.singletons.get( interfaceClass );
 		if ( list == null ) {
 			list = readAListWithAllCreatedClassesImplementing( interfaceClass );
@@ -115,10 +115,9 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 	}
 
 	private HashSet<String> readAListWithAllCreatedClassesImplementing( final String interfaceClass ) {
-		final LinkedHashSet<String> foundSingletons = new LinkedHashSet<>();
-		for ( final Class<?> implementationClass : ServiceLoader.loadImplementationsFor( interfaceClass ) ) {
+		final LinkedHashSet<String> foundSingletons = new LinkedHashSet<String>();
+		for ( final Class<?> implementationClass : ServiceLoader.loadImplementationsFor( interfaceClass ) )
 			foundSingletons.add( implementationClass.getCanonicalName() );
-		}
 		return foundSingletons;
 	}
 
@@ -144,7 +143,7 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 		try {
 			Class.forName( name );
 			return true;
-		} catch ( IllegalArgumentException | ClassNotFoundException cause ) {
+		} catch ( final Exception cause ) {
 			return false;
 		}
 	}
@@ -195,7 +194,7 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 		return this.processingEnv.getFiler();
 	}
 
-	private void log( String msg ) {
+	private void log( final String msg ) {
 		System.out.println( msg );
 		processingEnv.getMessager().printMessage( Kind.MANDATORY_WARNING, msg );
 	}
@@ -208,7 +207,7 @@ public class ProvidedClassesProcessor extends AbstractProcessor {
 	/**
 	 * We just return the latest version of whatever JDK we run on. Stupid?
 	 * Yeah, but it's either that or warnings on all versions but 1. Blame Joe.
-	 * 
+	 *
 	 * PS: this method was copied from Project Lombok. ;)
 	 */
 	@Override

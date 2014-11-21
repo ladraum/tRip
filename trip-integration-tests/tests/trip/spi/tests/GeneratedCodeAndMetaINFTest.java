@@ -14,11 +14,12 @@ public class GeneratedCodeAndMetaINFTest {
 
 	final ServiceProvider provider = new ServiceProvider();
 
-	@Test
-	public void grantThatGenerateNewHelloWorld() throws ServiceProviderException {
-		final HelloWorld helloWorld = this.provider.load( HelloWorld.class );
-		assertEquals( "Helllooooo", helloWorld.toString() );
-	}
+	// @Test
+	// public void grantThatGenerateNewHelloWorld() throws
+	// ServiceProviderException {
+	// final HelloWorld helloWorld = this.provider.load( HelloWorld.class );
+	// assertEquals( "Helllooooo", helloWorld.toString() );
+	// }
 
 	@Test
 	public void grantThatGenerateNewHelloFoo() throws ServiceProviderException {

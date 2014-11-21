@@ -17,7 +17,7 @@ import trip.spi.helpers.filter.Filter;
 public class ProducerFactoryMap implements Map<Class<?>, List<ProducerFactory<?>>> {
 
 	@Delegate
-	final Map<Class<?>, List<ProducerFactory<?>>> map = new HashMap<>();
+	final Map<Class<?>, List<ProducerFactory<?>>> map = new HashMap<Class<?>, List<ProducerFactory<?>>>();
 
 	@SuppressWarnings("rawtypes")
 	public static ProducerFactoryMap from( final Iterable<ProducerFactory> iterable ) {
@@ -40,7 +40,7 @@ public class ProducerFactoryMap implements Map<Class<?>, List<ProducerFactory<?>
 	public void memorizeProviderForClazz( final ProducerFactory<?> provider, final Class<?> clazz ) {
 		List<ProducerFactory<?>> iterable = map.get( clazz );
 		if ( iterable == null ) {
-			iterable = new ArrayList<>();
+			iterable = new ArrayList<ProducerFactory<?>>();
 			map.put( clazz, iterable );
 		}
 		iterable.add( provider );

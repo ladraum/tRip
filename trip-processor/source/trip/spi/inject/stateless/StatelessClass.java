@@ -79,10 +79,10 @@ public class StatelessClass implements GenerableClass {
 	 * @param postConstructMethods
 	 * @param preDestroyMethods
 	 */
-	public StatelessClass( String serviceIdentificationName, String typeCanonicalName,
-		String implementationCanonicalName, boolean exposedByClass,
-		List<ExposedMethod> exposedMethods, List<ExposedMethod> postConstructMethods,
-		List<ExposedMethod> preDestroyMethods ) {
+	public StatelessClass( final String serviceIdentificationName, final String typeCanonicalName,
+		final String implementationCanonicalName, final boolean exposedByClass,
+		final List<ExposedMethod> exposedMethods, final List<ExposedMethod> postConstructMethods,
+		final List<ExposedMethod> preDestroyMethods ) {
 		this.serviceIdentificationName = serviceIdentificationName;
 		this.packageName = extractPackageNameFrom( implementationCanonicalName );
 		this.typeCanonicalName = typeCanonicalName;
@@ -106,8 +106,8 @@ public class StatelessClass implements GenerableClass {
 	}
 
 	private String exposedMethodsAsString() {
-		StringBuilder buffer = new StringBuilder();
-		for ( ExposedMethod method : exposedMethods )
+		final StringBuilder buffer = new StringBuilder();
+		for ( final ExposedMethod method : exposedMethods )
 			buffer
 					.append( method.name )
 					.append( method.returnType )
@@ -115,11 +115,11 @@ public class StatelessClass implements GenerableClass {
 		return buffer.toString();
 	}
 
-	String extractPackageNameFrom( String canonicalName ) {
+	String extractPackageNameFrom( final String canonicalName ) {
 		return canonicalName.replaceFirst( "(.*)\\.[^\\.]+", "$1" );
 	}
 
-	String extractClassNameFrom( String canonicalName ) {
+	String extractClassNameFrom( final String canonicalName ) {
 		return canonicalName.replaceFirst( ".*\\.([^\\.]+)", "$1" );
 	}
 
@@ -163,58 +163,54 @@ public class StatelessClass implements GenerableClass {
 				identifaction );
 	}
 
-	public static StatelessClass from( TypeElement type ) {
-		String serviceIdentificationName = SingletonImplementation.getProvidedServiceName( type );
-		String typeCanonicalName = SingletonImplementation.getProvidedServiceClassAsString( type );
-		String implementationCanonicalName = type.asType().toString();
-		boolean exposedByClass = isImplementingClass( typeCanonicalName, type );
-		List<ExposedMethod> exposedMethods = retrieveExposedMethods( type );
+	public static StatelessClass from( final TypeElement type ) {
+		final String serviceIdentificationName = SingletonImplementation.getProvidedServiceName( type );
+		final String typeCanonicalName = SingletonImplementation.getProvidedServiceClassAsString( type );
+		final String implementationCanonicalName = type.asType().toString();
+		final boolean exposedByClass = isImplementingClass( typeCanonicalName, type );
+		final List<ExposedMethod> exposedMethods = retrieveExposedMethods( type );
 		return new StatelessClass( serviceIdentificationName, typeCanonicalName,
 			implementationCanonicalName, exposedByClass, exposedMethods,
 			retrieveMethodsAnnotatedWith( type, PostConstruct.class, javax.annotation.PostConstruct.class ),
 			retrieveMethodsAnnotatedWith( type, PreDestroy.class, javax.annotation.PreDestroy.class ) );
 	}
 
-	public static boolean isImplementingClass( String typeCanonicalName, TypeElement type ) {
+	public static boolean isImplementingClass( final String typeCanonicalName, TypeElement type ) {
 		while ( !Object.class.getCanonicalName().equals( type.asType().toString() ) ) {
-			for ( TypeMirror interfaceType : type.getInterfaces() )
+			for ( final TypeMirror interfaceType : type.getInterfaces() )
 				if ( typeCanonicalName.equals( interfaceType.toString() ) )
 					return false;
-			type = ( (TypeElement)( (DeclaredType)type.getSuperclass() ).asElement() );
+			type = (TypeElement)( (DeclaredType)type.getSuperclass() ).asElement();
 		}
 		return true;
 	}
 
-	static List<ExposedMethod> retrieveExposedMethods( TypeElement type ) {
-		List<ExposedMethod> list = new ArrayList<ExposedMethod>();
-		for ( Element method : type.getEnclosedElements() ) {
+	static List<ExposedMethod> retrieveExposedMethods( final TypeElement type ) {
+		final List<ExposedMethod> list = new ArrayList<ExposedMethod>();
+		for ( final Element method : type.getEnclosedElements() )
 			if ( isExposedMethod( method ) )
 				list.add( ExposedMethod.from( (ExecutableElement)method ) );
-		}
 		return list;
 	}
 
-	@SafeVarargs
-	static List<ExposedMethod> retrieveMethodsAnnotatedWith( TypeElement type,
-		Class<? extends Annotation>... annotations ) {
-		List<ExposedMethod> list = new ArrayList<ExposedMethod>();
-		for ( Class<? extends Annotation> annotation : annotations )
-			for ( Element method : type.getEnclosedElements() ) {
+	static List<ExposedMethod> retrieveMethodsAnnotatedWith( final TypeElement type,
+		final Class<? extends Annotation>... annotations ) {
+		final List<ExposedMethod> list = new ArrayList<ExposedMethod>();
+		for ( final Class<? extends Annotation> annotation : annotations )
+			for ( final Element method : type.getEnclosedElements() )
 				if ( isExposedMethod( method )
-					&& method.getAnnotation( annotation ) != null ) {
+					&& method.getAnnotation( annotation ) != null )
 					list.add( ExposedMethod.from( (ExecutableElement)method ) );
-				}
-			}
 		return list;
 	}
 
-	static boolean isExposedMethod( Element method ) {
+	static boolean isExposedMethod( final Element method ) {
 		return method.getKind().equals( ElementKind.METHOD )
 			&& !isPrivate( (ExecutableElement)method );
 	}
 
-	static boolean isPrivate( ExecutableElement method ) {
-		for ( Modifier modifier : method.getModifiers() )
+	static boolean isPrivate( final ExecutableElement method ) {
+		for ( final Modifier modifier : method.getModifiers() )
 			if ( modifier.equals( Modifier.PRIVATE ) )
 				return true;
 		return false;
