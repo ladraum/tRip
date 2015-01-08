@@ -1,12 +1,14 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>io.skullabs.trip</groupId>
-	<version>1.2.1</version>
+	<version>1.2.2</version>
 	<artifactId>trip-parent</artifactId>
-	<name>tRip</name>
 	<packaging>pom</packaging>
+
+	<name>tRip</name>
+	<description>tRip intent to be a practical and lightweight tool to provide modularity and low coupling on your source code</description>
+	<url>https://github.com/Skullabs/trip</url>
 
 	<licenses>
 		<license>
@@ -16,17 +18,21 @@
 		</license>
 	</licenses>
 
+	<scm>
+		<connection>scm:git:git@github.com:Skullabs/tRip.git</connection>
+		<developerConnection>scm:git:git@github.com:Skullabs/tRip.git</developerConnection>
+		<url>git@github.com:Skullabs/tRip.git</url>
+	</scm>
+
 	<distributionManagement>
-		<repository>
-			<id>skullabs-release-repository</id>
-			<name>Release Repository</name>
-			<url>http://skullabs.io:8081/content/repositories/PublicRelease/</url>
-		</repository>
 		<snapshotRepository>
-			<id>skullabs-snapshot-repository</id>
-			<name>Snapshot Repository</name>
-			<url>http://skullabs.io:8081/content/repositories/PublicSnapshot/</url>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
 	</distributionManagement>
 
 	<developers>
@@ -34,6 +40,11 @@
 			<id>miere</id>
 			<email>miere.teixeira@gmail.com</email>
 			<name>Miere Liniel Teixeira</name>
+		</developer>
+		<developer>
+			<id>selomke</id>
+			<email>cesar.selomke@gmail.com</email>
+			<name>Cesar Henrique Selomke</name>
 		</developer>
 	</developers>
 
@@ -54,6 +65,7 @@
 		<module>trip-core</module>
 		<module>trip-processor</module>
 		<module>trip-integration-tests</module>
+		<module>trip-project</module>
 		<module>sample</module>
 	</modules>
 
@@ -248,20 +260,6 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>2.3</version>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>jar-no-fork</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<groupId>org.eclipse.m2e</groupId>
 				<artifactId>lifecycle-mapping</artifactId>
 				<configuration>
@@ -424,4 +422,70 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>deploy</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>2.3</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>2.10.1</version>
+						<executions>
+							<execution>
+								<phase>verify</phase>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<show>private</show>
+							<nohelp>true</nohelp>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.5</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.sonatype.plugins</groupId>
+						<artifactId>nexus-staging-maven-plugin</artifactId>
+						<version>1.6.3</version>
+						<extensions>true</extensions>
+						<configuration>
+							<serverId>ossrh</serverId>
+							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+							<autoReleaseAfterClose>false</autoReleaseAfterClose>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
