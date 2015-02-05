@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>io.skullabs.trip</groupId>
-	<version>1.2.2</version>
+	<version>1.2.3</version>
 	<artifactId>trip-parent</artifactId>
 	<packaging>pom</packaging>
 
