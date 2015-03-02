@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>io.skullabs.trip</groupId>
-	<version>1.2.3</version>
+	<version>1.2.4</version>
 	<artifactId>trip-project</artifactId>
 	<name>tRip: Boilerplate Project</name>
 	<description>tRip Boilerplate Project</description>
@@ -51,7 +51,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<jdk.source.version>1.7</jdk.source.version>
+		<jdk.source.version>1.8</jdk.source.version>
 		<jdk.compile.version>${jdk.source.version}</jdk.compile.version>
 		<!-- Test Properties -->
 		<build.profile.id>dev</build.profile.id>
@@ -59,8 +59,8 @@
 		<skip.unit.tests>false</skip.unit.tests>
 		<!-- Dependencies Versions -->
 		<version.junit>4.12</version.junit>
-		<version.lombok>1.14.8</version.lombok>
-		<version.mockito>1.9.5</version.mockito>
+		<version.lombok>1.16.2</version.lombok>
+		<version.mockito>1.10.19</version.mockito>
 		<version.maven.compiler.plugin>2.3.2</version.maven.compiler.plugin>
 	</properties>
 
@@ -88,14 +88,14 @@
 		<dependency>
 			<groupId>io.skullabs.trip</groupId>
 			<artifactId>trip-processor</artifactId>
-			<version>1.2.3</version>
+			<version>1.2.4</version>
 			<scope>provided</scope>
 		</dependency>
 		<!-- Run time dependencies -->
 		<dependency>
 			<groupId>io.skullabs.trip</groupId>
 			<artifactId>trip-core</artifactId>
-			<version>1.2.3</version>
+			<version>1.2.4</version>
 		</dependency>
 	</dependencies>
 
