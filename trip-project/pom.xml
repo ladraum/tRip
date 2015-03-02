@@ -59,7 +59,7 @@
 		<skip.unit.tests>false</skip.unit.tests>
 		<!-- Dependencies Versions -->
 		<version.junit>4.12</version.junit>
-		<version.lombok>1.16.2</version.lombok>
+		<version.lombok>1.14.8</version.lombok>
 		<version.mockito>1.10.19</version.mockito>
 		<version.maven.compiler.plugin>2.3.2</version.maven.compiler.plugin>
 	</properties>
