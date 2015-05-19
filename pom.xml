@@ -65,8 +65,8 @@
 		<module>trip-core</module>
 		<module>trip-processor</module>
 		<module>trip-integration-tests</module>
-		<module>trip-project</module>
 		<module>sample</module>
+		<module>trip-all</module>
 	</modules>
 
 	<properties>
@@ -128,6 +128,11 @@
 				<groupId>${project.groupId}</groupId>
 				<version>${project.version}</version>
 				<artifactId>trip-processor</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<version>${project.version}</version>
+				<artifactId>trip-all</artifactId>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
