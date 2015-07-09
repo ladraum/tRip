@@ -6,11 +6,13 @@ import java.util.List;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 
+@Log
 @Getter
 @RequiredArgsConstructor
 public class LazyClassInstantor<T> implements Iterator<T> {
-	
+
 	final Iterator<Class<T>> reader;
 	List<T> cache = new ArrayList<T>();
 
@@ -22,11 +24,15 @@ public class LazyClassInstantor<T> implements Iterator<T> {
 	@Override
 	public T next() {
 		try {
-			Class<T> clazz = reader.next();
-			T instance = clazz.newInstance();
+			final Class<T> clazz = reader.next();
+			final T instance = clazz.newInstance();
 			cache.add(instance);
 			return instance;
-		} catch (InstantiationException | IllegalAccessException cause) {
+		} catch ( final IllegalAccessException cause ) {
+			log.warning( cause.getMessage() );
+			throw new IllegalStateException( cause );
+		} catch ( final InstantiationException cause ) {
+			log.warning( cause.getMessage() );
 			throw new IllegalStateException(cause);
 		}
 	}

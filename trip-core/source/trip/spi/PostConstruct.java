@@ -6,8 +6,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention( RetentionPolicy.RUNTIME )
-@Target( { ElementType.FIELD, ElementType.METHOD, ElementType.TYPE } )
-public @interface Name {
-	
-	String value();
+@Target( { ElementType.METHOD, ElementType.TYPE } )
+public @interface PostConstruct {
+
+	/**
+	 * The name that identifies the service.
+	 */
+	String name() default "";
 }

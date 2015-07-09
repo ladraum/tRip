@@ -20,9 +20,13 @@ public class CachedIterable<T> implements Iterable<T> {
 	}
 
 	public Iterable<T> createCache() {
-		List<T> cache = new ArrayList<T>();
+		final List<T> cache = new ArrayList<T>();
 		while( cachedProducer.hasNext() )
-			cache.add( cachedProducer.next() );
+			try {
+				cache.add( cachedProducer.next() );
+			} catch ( final IllegalStateException cause ) {
+				continue;
+			}
 		return cache;
 	}
 }

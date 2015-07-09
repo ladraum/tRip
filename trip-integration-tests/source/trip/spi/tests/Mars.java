@@ -1,13 +1,12 @@
 package trip.spi.tests;
 
-import trip.spi.Service;
+import trip.spi.Singleton;
 
-@Service
+@Singleton( exposedAs = World.class )
 public class Mars implements World {
 
 	@Override
 	public String getWorld() {
 		return "Mars";
 	}
-
 }

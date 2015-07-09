@@ -4,19 +4,23 @@ import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.Accessors;
 import trip.spi.ProviderContext;
 
 @Getter
 @Setter
 @Accessors( fluent = true )
+@RequiredArgsConstructor
 public class KeyValueProviderContext implements ProviderContext {
 
 	final Map<Class<?>, Annotation> annotationMap = new HashMap<Class<?>, Annotation>();
-	final Map<String, Object> attributes = new HashMap<String, Object>();
+	final Map<String, Object> attributes;
 	Class<?> targetType;
+
+	public KeyValueProviderContext() {
+		attributes = new HashMap<String, Object>();
+	}
 
 	@Override
 	@SuppressWarnings( "unchecked" )

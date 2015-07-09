@@ -4,15 +4,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import trip.spi.Name;
 import trip.spi.Provided;
-import trip.spi.Service;
+import trip.spi.Singleton;
 
-@Service
+@Singleton( exposedAs = Converter.class )
 public class DateConverter implements Converter<Date> {
 
-	@Provided
-	@Name( "date-format" )
+	@Provided( name = "date-format" )
 	String pattern;
 
 	@Override

@@ -1,8 +1,8 @@
 package blah.tests;
 
-import trip.spi.Service;
+import trip.spi.Singleton;
 
-@Service( Converter.class )
+@Singleton( exposedAs = Converter.class )
 public class LongConverter implements Converter<Long> {
 
 	@Override

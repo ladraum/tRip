@@ -6,10 +6,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention( RetentionPolicy.RUNTIME )
-@Target( { ElementType.TYPE } )
-public @interface Service {
+@Target( { ElementType.METHOD, ElementType.TYPE } )
+public @interface PreDestroy {
 
-	Class<?> value() default Service.class;
-
-	boolean singleton() default true;
+	/**
+	 * The name that identifies the service.
+	 */
+	String name() default "";
 }

@@ -1,21 +1,16 @@
 package trip.spi.tests;
 
-import lombok.Delegate;
-import trip.spi.Name;
 import trip.spi.Provided;
-import trip.spi.Service;
+import trip.spi.Singleton;
 
-@Service( Hero.class )
-@Name( "batman" )
+@Singleton( exposedAs = Hero.class, name = "batman" )
 public class Batman implements Hero, World {
 
-	@Delegate
-	@Name( "ajax" )
-	@Provided
-	Hero ajax;
+	@Provided( exposedAs = World.class )
+	Mars mars;
 
 	@Override
 	public String getWorld() {
-		return ajax.getClass().getSimpleName();
+		return mars.getWorld();
 	}
 }

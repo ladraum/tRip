@@ -4,7 +4,7 @@
 
 	<parent>
 		<groupId>io.skullabs.trip</groupId>
-		<version>0.11.1</version>
+		<version>1.2.5-SNAPSHOT</version>
 		<artifactId>trip-parent</artifactId>
 	</parent>
 
@@ -15,11 +15,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>trip-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>trip-processor</artifactId>
+			<artifactId>trip-all</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.github.spullara.mustache.java</groupId>

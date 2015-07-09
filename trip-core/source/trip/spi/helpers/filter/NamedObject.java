@@ -2,7 +2,6 @@ package trip.spi.helpers.filter;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import trip.spi.Name;
 
 @RequiredArgsConstructor
 public class NamedObject<T> implements Condition<T> {
@@ -10,11 +9,8 @@ public class NamedObject<T> implements Condition<T> {
 	final String name;
 
 	@Override
-	public boolean check(Object object) {
+	public boolean check( T object ) {
 		val clazz = object.getClass();
-		Name nameAnnotation = clazz.getAnnotation( Name.class );
-		if ( nameAnnotation == null )
-			return false;
-		return name.equals( nameAnnotation.value() );
+		return NameExtractor.doesClassAnnotationsMatchesTheName( clazz, name );
 	}
 }

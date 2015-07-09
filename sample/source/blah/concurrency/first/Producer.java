@@ -13,16 +13,16 @@ import lombok.RequiredArgsConstructor;
 public class Producer {
 
 	final ExecutorService executor = Executors.newCachedThreadPool();
-	final BlockingQueue<Number> data = new LinkedBlockingQueue<>();
+	final BlockingQueue<Number> data = new LinkedBlockingQueue<Number>();
 	final CountDownLatch counter;
-	
+
 	public Consumer createConsumer() {
-		Consumer consumer = new Consumer(data, counter);
+		final Consumer consumer = new Consumer(data, counter);
 		executor.submit(consumer);
 		return consumer;
 	}
 
-	public void createConsumers( int amountOfConsumers ) {
+	public void createConsumers( final int amountOfConsumers ) {
 		for ( int i=0; i<amountOfConsumers; i++ )
 			createConsumer();
 	}
@@ -35,7 +35,7 @@ public class Producer {
 		executor.shutdown();
 		try {
 			executor.awaitTermination(100, TimeUnit.MILLISECONDS);
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			executor.shutdownNow();
 		}
 	}

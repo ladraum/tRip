@@ -1,7 +1,9 @@
 package trip.spi;
 
+import lombok.Getter;
 import trip.spi.Provided;
 
+@Getter
 public class PrintableHello implements Printable {
 
 	@Provided PrintableWord word;
